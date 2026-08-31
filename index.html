@@ -12,11 +12,14 @@
         .container { max-width: 900px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; color: #0056b3; text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; }
         
-        /* Patient Info */
+        /* Patient Info & Camera */
         .patient-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #e9ecef; padding: 15px; border-radius: 6px; }
         .patient-info div { display: flex; flex-direction: column; }
         .patient-info label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
         .patient-info input, .patient-info select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .camera-area { background: #dce3e8; padding: 15px; border-radius: 6px; grid-column: 1 / -1; align-items: flex-start; }
+        .btn-camera { background: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;}
+        .btn-camera:hover { background: #138496; }
 
         /* Tabs */
         .tabs { display: flex; border-bottom: 2px solid #0056b3; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; }
@@ -34,9 +37,14 @@
         .check-item input[type="checkbox"] { margin-top: 4px; margin-right: 12px; transform: scale(1.2); }
         .check-item label { cursor: pointer; width: 100%; }
         
-        .measure-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 10px; align-items: center; }
-        .measure-grid input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box;}
-        .measure-grid div { font-weight: bold; background: #e9ecef; padding: 8px; text-align: center; }
+        .measure-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 10px; align-items: start; }
+        .measure-grid input[type="text"] { padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box;}
+        .measure-grid > div.header-col { font-weight: bold; background: #e9ecef; padding: 8px; text-align: center; }
+        
+        /* 分割入力・前データ表示用 */
+        .compound-input { display: flex; align-items: center; gap: 4px; }
+        .compound-input input { width: 100%; min-width: 40px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
+        .prev-value { font-size: 12px; color: #dc3545; font-weight: bold; text-align: left; margin-bottom: 4px; display: block; }
         
         .signature-area { margin-top: 20px; background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 10px; }
         .signature-area label { font-weight: bold; display: block; margin-bottom: 10px; }
@@ -63,7 +71,7 @@
         .btn-delete { background-color: #dc3545; color: white; }
         .btn-new { background-color: #0056b3; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 20px; display: inline-block; }
         
-        .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .btn-back { background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
         .btn-excel { background-color: #198754; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-excel:hover { background-color: #157347; }
@@ -104,7 +112,7 @@
             </div>
         </div>
         
-        <!-- 基本情報 -->
+        <!-- 基本情報 & カメラ -->
         <div class="patient-info">
             <div>
                 <label>患者ID</label>
@@ -122,6 +130,14 @@
                 <label>MRI検査実施日</label>
                 <input type="date" id="exam-date" class="save-target">
             </div>
+            <!-- カメラ領域 -->
+            <div class="camera-area">
+                <label>MRI対応カード (表面) の写真保存</label>
+                <input type="file" id="card-image-input" accept="image/*" capture="environment" style="display:none;">
+                <button class="btn-camera" onclick="document.getElementById('card-image-input').click()">📷 カメラを起動 / 写真を選択</button>
+                <img id="card-image-preview" src="" style="display:none; max-width: 100%; max-height: 250px; margin-top: 15px; border: 2px solid #fff; border-radius:4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <button id="btn-clear-card" class="btn-clear" style="display:none; margin-top:10px;" onclick="clearCardImage()">写真を削除</button>
+            </div>
         </div>
 
         <!-- タブメニュー -->
@@ -135,6 +151,13 @@
         <!-- オーダ前 -->
         <div id="tab1" class="tab-content active">
             <h3>条件適応判断</h3>
+            <label class="check-item">
+                <input type="checkbox" id="chk1-0" class="save-target">
+                <span>
+                    <a href="https://cieds-mri.com/jadia/public/mri-combi_search/index" target="_blank" onclick="checkCombiSearch()" style="color: #0056b3; text-decoration: underline; font-weight: bold;">MRI対応デバイスの組み合わせ検索サイト(CIEDs-MRI)</a>
+                    にアクセスして条件適応を確認した
+                </span>
+            </label>
             <label class="check-item"><input type="checkbox" id="chk1-1" class="save-target"> <span>患者様より条件付きMRI対応カードの提示がある</span></label>
             <label class="check-item"><input type="checkbox" id="chk1-2" class="save-target"> <span>患者様より条件付きMRIペースメーカの手帳の提示がある</span></label>
             <label class="check-item"><input type="checkbox" id="chk1-3" class="save-target"> <span>ペースメーカ植込み後6週間を超えている</span></label>
@@ -155,18 +178,25 @@
             <label class="check-item"><input type="checkbox" id="chk2-1" class="save-target"> <span>Bipolar Pacingである</span></label>
             
             <div class="measure-grid">
-                <div>計測項目</div><div>心房</div><div>心室</div>
-                <label>リードインピーダンス (200～2000 Ω)</label>
-                <input type="text" id="pre-imp-a" class="save-target" placeholder="Ω">
-                <input type="text" id="pre-imp-v" class="save-target" placeholder="Ω">
+                <div class="header-col">計測項目</div><div class="header-col">心房</div><div class="header-col">心室</div>
                 
-                <label>ペーシング閾値 (2.0 V / 0.4 ms以下)</label>
-                <input type="text" id="pre-th-a" class="save-target" placeholder="V">
-                <input type="text" id="pre-th-v" class="save-target" placeholder="V">
+                <label>リードインピーダンス<br>(200～2000 Ω)</label>
+                <div><input type="text" id="pre-imp-a" class="save-target" placeholder="Ω"></div>
+                <div><input type="text" id="pre-imp-v" class="save-target" placeholder="Ω"></div>
                 
-                <label>波高値 (横隔膜ツイッチング無)</label>
-                <input type="text" id="pre-amp-a" class="save-target" placeholder="mV">
-                <input type="text" id="pre-amp-v" class="save-target" placeholder="mV">
+                <label>ペーシング閾値<br>(2.0 V / 0.4 ms以下)</label>
+                <div class="compound-input">
+                    <input type="number" step="0.1" id="pre-th-a-v" class="save-target" placeholder="V"> / 
+                    <input type="number" step="0.1" id="pre-th-a-ms" class="save-target" placeholder="ms">
+                </div>
+                <div class="compound-input">
+                    <input type="number" step="0.1" id="pre-th-v-v" class="save-target" placeholder="V"> / 
+                    <input type="number" step="0.1" id="pre-th-v-ms" class="save-target" placeholder="ms">
+                </div>
+                
+                <label>波高値<br>(横隔膜ツイッチング無)</label>
+                <div><input type="text" id="pre-amp-a" class="save-target" placeholder="mV"></div>
+                <div><input type="text" id="pre-amp-v" class="save-target" placeholder="mV"></div>
             </div>
 
             <h3 style="margin-top: 20px;">MRI撮像中モード指示</h3>
@@ -189,61 +219,87 @@
             <p class="alert">※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。</p>
         </div>
 
-    <!-- MRI検査時 -->
-    <div id="tab3" class="tab-content">
-        <h3>MRI撮影時チェック</h3>
-        <label class="check-item"><input type="checkbox" id="chk3-1" class="save-target"> <span>撮像は側臥位ではない</span></label>
-        <label class="check-item"><input type="checkbox" id="chk3-2" class="save-target"> <span>一軸あたりの最大勾配スルーレートが 200 T/m/s 以下</span></label>
-        <label class="check-item"><input type="checkbox" id="chk3-3" class="save-target"> <span>全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満</span></label>
-        <label class="check-item"><input type="checkbox" id="chk3-4" class="save-target"> <span>送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと</span></label>
-        <label class="check-item"><input type="checkbox" id="chk3-5" class="save-target"> <span>患者動態モニタリングを行えている</span></label>
+        <!-- MRI検査時 -->
+        <div id="tab3" class="tab-content">
+            <h3>MRI撮影時チェック</h3>
+            <label class="check-item"><input type="checkbox" id="chk3-1" class="save-target"> <span>撮像は側臥位ではない</span></label>
+            <label class="check-item"><input type="checkbox" id="chk3-2" class="save-target"> <span>一軸あたりの最大勾配スルーレートが 200 T/m/s 以下</span></label>
+            <label class="check-item"><input type="checkbox" id="chk3-3" class="save-target"> <span>全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満</span></label>
+            <label class="check-item"><input type="checkbox" id="chk3-4" class="save-target"> <span>送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと</span></label>
+            <label class="check-item"><input type="checkbox" id="chk3-5" class="save-target"> <span>患者動態モニタリングを行えている</span></label>
 
-        <!-- 放射線課 署名欄 -->
-        <div class="signature-area">
-            <label>放射線課 署名（印）</label>
-            <canvas id="sig-canvas-rad" width="400" height="150"></canvas>
-            <button class="btn-clear" onclick="clearSignature('rad')">クリア</button>
-        </div>
-    </div>
-
-    <!-- MRI検査後 -->
-    <div id="tab4" class="tab-content">
-        <h3>設定戻しの確認</h3>
-        <label class="check-item"><input type="checkbox" id="chk4-1" class="save-target"> <span>設定戻しの確認を行った</span></label>
-        <label class="check-item"><input type="checkbox" id="chk4-2" class="save-target"> <span>前データとの変動が無い事を確認した</span></label>
-
-        <div class="measure-grid">
-            <div>計測項目</div><div>心房</div><div>心室</div>
-            <label>リードインピーダンス</label>
-            <input type="text" id="post-imp-a" class="save-target" placeholder="Ω">
-            <input type="text" id="post-imp-v" class="save-target" placeholder="Ω">
-            
-            <label>ペーシング閾値</label>
-            <input type="text" id="post-th-a" class="save-target" placeholder="V">
-            <input type="text" id="post-th-v" class="save-target" placeholder="V">
-            
-            <label>波高値</label>
-            <input type="text" id="post-amp-a" class="save-target" placeholder="mV">
-            <input type="text" id="post-amp-v" class="save-target" placeholder="mV">
+            <!-- 放射線課 署名欄 -->
+            <div class="signature-area">
+                <label>放射線課 署名（印）</label>
+                <canvas id="sig-canvas-rad" width="400" height="150"></canvas>
+                <button class="btn-clear" onclick="clearSignature('rad')">クリア</button>
+            </div>
         </div>
 
-        <!-- 循環器内科 医師署名欄 -->
-        <div class="signature-area">
-            <label>循環器内科 医師署名（印）</label>
-            <canvas id="sig-canvas-doc" width="400" height="150"></canvas>
-            <button class="btn-clear" onclick="clearSignature('doc')">クリア</button>
-        </div>
-    </div>
+        <!-- MRI検査後 -->
+        <div id="tab4" class="tab-content">
+            <h3>設定戻しの確認</h3>
+            <label class="check-item"><input type="checkbox" id="chk4-1" class="save-target"> <span>設定戻しの確認を行った</span></label>
+            <label class="check-item"><input type="checkbox" id="chk4-2" class="save-target"> <span>前データとの変動が無い事を確認した</span></label>
 
-    <div id="save-msg" class="save-status">保存されました</div>
-    <button class="btn-reset" onclick="deleteCurrentRecord()">この患者データを削除する</button>
+            <div class="measure-grid">
+                <div class="header-col">計測項目</div><div class="header-col">心房</div><div class="header-col">心室</div>
+                
+                <label>リードインピーダンス</label>
+                <div>
+                    <span class="prev-value">前: <span id="disp-pre-imp-a">-</span></span>
+                    <input type="text" id="post-imp-a" class="save-target" placeholder="Ω">
+                </div>
+                <div>
+                    <span class="prev-value">前: <span id="disp-pre-imp-v">-</span></span>
+                    <input type="text" id="post-imp-v" class="save-target" placeholder="Ω">
+                </div>
+                
+                <label>ペーシング閾値</label>
+                <div>
+                    <span class="prev-value">前: <span id="disp-pre-th-a">-</span></span>
+                    <div class="compound-input">
+                        <input type="number" step="0.1" id="post-th-a-v" class="save-target" placeholder="V"> / 
+                        <input type="number" step="0.1" id="post-th-a-ms" class="save-target" placeholder="ms">
+                    </div>
+                </div>
+                <div>
+                    <span class="prev-value">前: <span id="disp-pre-th-v">-</span></span>
+                    <div class="compound-input">
+                        <input type="number" step="0.1" id="post-th-v-v" class="save-target" placeholder="V"> / 
+                        <input type="number" step="0.1" id="post-th-v-ms" class="save-target" placeholder="ms">
+                    </div>
+                </div>
+                
+                <label>波高値</label>
+                <div>
+                    <span class="prev-value">前: <span id="disp-pre-amp-a">-</span></span>
+                    <input type="text" id="post-amp-a" class="save-target" placeholder="mV">
+                </div>
+                <div>
+                    <span class="prev-value">前: <span id="disp-pre-amp-v">-</span></span>
+                    <input type="text" id="post-amp-v" class="save-target" placeholder="mV">
+                </div>
+            </div>
+
+            <!-- 循環器内科 医師署名欄 -->
+            <div class="signature-area">
+                <label>循環器内科 医師署名（印）</label>
+                <canvas id="sig-canvas-doc" width="400" height="150"></canvas>
+                <button class="btn-clear" onclick="clearSignature('doc')">クリア</button>
+            </div>
+        </div>
+
+        <div id="save-msg" class="save-status">保存されました</div>
+        <button class="btn-reset" onclick="deleteCurrentRecord()">この患者データを削除する</button>
     </div> <!-- /detail-view -->
 </div>
 
 <script>
     // --- データ管理用の変数 ---
-    let patientRecords = []; // 複数の患者データを格納する配列
-    let currentRecordId = null; // 現在編集中のレコードID
+    let patientRecords = []; 
+    let currentRecordId = null; 
+    let cardImageDataUrl = null; // カメラ画像の保持用
 
     // --- タブ切り替え処理 ---
     function openTab(evt, tabName) {
@@ -263,11 +319,99 @@
             targetTab.style.display = "block";
             targetTab.className += " active";
         }
-        
         if(evt && evt.currentTarget) {
             evt.currentTarget.className += " active";
         }
+        
+        // 検査後タブを開く時に、検査前データを表示に反映
+        if (tabName === 'tab4') {
+            updatePrevDataDisplay();
+        }
     }
+
+    // --- 「検査前データ」を検査後画面に反映する処理 ---
+    function updatePrevDataDisplay() {
+        const getDomVal = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        };
+        
+        const preImpA = getDomVal('pre-imp-a');
+        document.getElementById('disp-pre-imp-a').innerText = preImpA ? preImpA + ' Ω' : '-';
+        const preImpV = getDomVal('pre-imp-v');
+        document.getElementById('disp-pre-imp-v').innerText = preImpV ? preImpV + ' Ω' : '-';
+        
+        const preThAV = getDomVal('pre-th-a-v');
+        const preThAMs = getDomVal('pre-th-a-ms');
+        document.getElementById('disp-pre-th-a').innerText = (preThAV || preThAMs) ? `${preThAV || '-'} V / ${preThAMs || '-'} ms` : '-';
+        
+        const preThVV = getDomVal('pre-th-v-v');
+        const preThVMs = getDomVal('pre-th-v-ms');
+        document.getElementById('disp-pre-th-v').innerText = (preThVV || preThVMs) ? `${preThVV || '-'} V / ${preThVMs || '-'} ms` : '-';
+        
+        const preAmpA = getDomVal('pre-amp-a');
+        document.getElementById('disp-pre-amp-a').innerText = preAmpA ? preAmpA + ' mV' : '-';
+        const preAmpV = getDomVal('pre-amp-v');
+        document.getElementById('disp-pre-amp-v').innerText = preAmpV ? preAmpV + ' mV' : '-';
+    }
+
+    // --- カメラ・写真処理 ---
+    function initCamera() {
+        document.getElementById('card-image-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                // 容量節約のために画像をリサイズ(圧縮)して保存
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const MAX_WIDTH = 800; // 最大横幅
+                        const MAX_HEIGHT = 800; // 最大縦幅
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // JPEG形式で少し圧縮して保存
+                        cardImageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        document.getElementById('card-image-preview').src = cardImageDataUrl;
+                        document.getElementById('card-image-preview').style.display = 'block';
+                        document.getElementById('btn-clear-card').style.display = 'inline-block';
+                        saveToLocalStorage();
+                    }
+                    img.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    function clearCardImage() {
+        cardImageDataUrl = null;
+        document.getElementById('card-image-input').value = "";
+        document.getElementById('card-image-preview').src = "";
+        document.getElementById('card-image-preview').style.display = 'none';
+        document.getElementById('btn-clear-card').style.display = 'none';
+        saveToLocalStorage();
+    }
+
 
     // --- サイン（Canvas）処理 ---
     const canvases = {
@@ -284,19 +428,16 @@
             const ctx = canvas.getContext('2d');
             contexts[key] = ctx;
             
-            // スタイル設定
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // イベントリスナー
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
             
-            // タッチイベント
             canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
             canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
             canvas.addEventListener('touchend', stopDrawing);
@@ -328,7 +469,7 @@
     }
 
     function handleTouchStart(e) {
-        e.preventDefault(); // スクロール防止
+        e.preventDefault();
         isDrawing = true;
         currentContext = e.target.getContext('2d');
         const pos = getTouchPos(e.target, e);
@@ -355,7 +496,7 @@
         if(isDrawing) {
             isDrawing = false;
             currentContext = null;
-            saveToLocalStorage(); // 描画終了時に保存
+            saveToLocalStorage(); 
         }
     }
 
@@ -363,7 +504,7 @@
         const canvas = canvases[type];
         const ctx = contexts[type];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        saveToLocalStorage(); // クリア時も保存
+        saveToLocalStorage();
     }
 
     // --- メモリ（自動保存）機能 ---
@@ -371,6 +512,15 @@
         const msg = document.getElementById('save-msg');
         msg.style.display = 'block';
         setTimeout(() => { msg.style.display = 'none'; }, 2000);
+    }
+
+    // 検索サイトリンククリック時の自動チェック機能
+    function checkCombiSearch() {
+        const chk = document.getElementById('chk1-0');
+        if (chk && !chk.checked) {
+            chk.checked = true;
+            saveToLocalStorage(); // チェックを入れたら即座に保存
+        }
     }
 
     function collectCurrentData() {
@@ -388,15 +538,17 @@
         for (let key in canvases) {
             data[`sig-${key}`] = canvases[key].toDataURL();
         }
+        
+        // 写真データを含める
+        data['card-image'] = cardImageDataUrl;
+        
         return data;
     }
 
     function saveToLocalStorage() {
-        if (!currentRecordId) return; // 編集モードでなければ保存しない
+        if (!currentRecordId) return;
 
         const currentData = collectCurrentData();
-        
-        // 既存のレコードを探して更新、なければ追加
         const index = patientRecords.findIndex(r => r.id === currentRecordId);
         if (index > -1) {
             patientRecords[index] = currentData;
@@ -404,12 +556,10 @@
             patientRecords.push(currentData);
         }
 
-        // localStorageに全体を保存
         localStorage.setItem('pm-mri-records', JSON.stringify(patientRecords));
         showSaveMessage();
-        
-        // ヘッダーの情報を更新
         updateCurrentRecordInfo();
+        updatePrevDataDisplay(); // 保存と同時に前データ表示も更新
     }
 
     // --- 画面切り替えとリスト管理 ---
@@ -432,15 +582,10 @@
             return;
         }
 
-        // 最新の更新順に並び替え
-        const sortedRecords = [...patientRecords].sort((a, b) => {
-            return new Date(b.lastUpdated) - new Date(a.lastUpdated);
-        });
+        const sortedRecords = [...patientRecords].sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
 
         sortedRecords.forEach(record => {
             const tr = document.createElement('tr');
-            
-            // IDや名前が空の場合は「未入力」とする
             const dispId = record['patient-id'] || '(未入力)';
             const dispName = record['patient-name'] || '(未入力)';
             const dispDate = record['exam-date'] || '-';
@@ -460,41 +605,28 @@
     }
 
     function showListView() {
-        // 一覧に戻る際、現在編集中のものがあれば保存する
-        if (currentRecordId) {
-            saveToLocalStorage();
-        }
+        if (currentRecordId) saveToLocalStorage();
         document.getElementById('detail-view').style.display = 'none';
         document.getElementById('list-view').style.display = 'block';
         currentRecordId = null;
-        renderList(); // リストを最新状態に更新
+        renderList();
     }
 
     function updateCurrentRecordInfo() {
         if (!currentRecordId) return;
-        const pIdElement = document.getElementById('patient-id');
-        const pNameElement = document.getElementById('patient-name');
-        
-        const pId = pIdElement ? (pIdElement.value || '未入力') : '未入力';
-        const pName = pNameElement ? (pNameElement.value || '未入力') : '未入力';
+        const pId = document.getElementById('patient-id').value || '未入力';
+        const pName = document.getElementById('patient-name').value || '未入力';
         document.getElementById('current-record-info').innerText = `編集中: ${pId} ${pName}`;
     }
 
     function createNewRecord() {
-        // 新しい一意のIDを生成 (タイムスタンプを使用)
         currentRecordId = 'rec_' + Date.now();
-        
-        // フォームをクリア
         clearFormElements();
+        saveToLocalStorage(); // 新規作成時に即座に保存
         
-        // ★新規作成時に空データを即座に保存（一覧にすぐ表示させるため）
-        saveToLocalStorage();
-        
-        // 最初のタブを開く
         const firstTab = document.querySelector('.tab');
         openTab(firstTab ? {currentTarget: firstTab} : null, 'tab1');
         
-        // 詳細画面を表示
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
         updateCurrentRecordInfo();
@@ -505,58 +637,56 @@
         const record = patientRecords.find(r => r.id === id);
         
         if (record) {
-            // データをフォームに流し込む
             const elements = document.querySelectorAll('.save-target');
             elements.forEach(el => {
                 if (record[el.id] !== undefined) {
-                    if (el.type === 'checkbox') {
-                        el.checked = record[el.id];
-                    } else {
-                        el.value = record[el.id];
-                    }
+                    if (el.type === 'checkbox') el.checked = record[el.id];
+                    else el.value = record[el.id];
                 } else {
-                     if (el.type === 'checkbox') {
-                        el.checked = false;
-                    } else {
-                        el.value = '';
-                    }
+                     if (el.type === 'checkbox') el.checked = false;
+                     else el.value = '';
                 }
             });
 
-            // サインの復元
             for (let key in canvases) {
                 const ctx = contexts[key];
-                ctx.clearRect(0, 0, canvases[key].width, canvases[key].height); // 一旦クリア
+                ctx.clearRect(0, 0, canvases[key].width, canvases[key].height);
                 if (record[`sig-${key}`]) {
                     const img = new Image();
-                    img.onload = function() {
-                        ctx.drawImage(img, 0, 0);
-                    };
+                    img.onload = function() { ctx.drawImage(img, 0, 0); };
                     img.src = record[`sig-${key}`];
                 }
             }
             
-            // 最初のタブを開く
+            // 写真の復元
+            if (record['card-image']) {
+                cardImageDataUrl = record['card-image'];
+                document.getElementById('card-image-preview').src = cardImageDataUrl;
+                document.getElementById('card-image-preview').style.display = 'block';
+                document.getElementById('btn-clear-card').style.display = 'inline-block';
+            } else {
+                clearCardImage();
+            }
+            
             const firstTab = document.querySelector('.tab');
             openTab(firstTab ? {currentTarget: firstTab} : null, 'tab1');
             
             document.getElementById('list-view').style.display = 'none';
             document.getElementById('detail-view').style.display = 'block';
             updateCurrentRecordInfo();
+            updatePrevDataDisplay();
         }
     }
 
     function clearFormElements() {
         const elements = document.querySelectorAll('.save-target');
         elements.forEach(el => {
-            if (el.type === 'checkbox') {
-                el.checked = false;
-            } else {
-                el.value = '';
-            }
+            if (el.type === 'checkbox') el.checked = false;
+            else el.value = '';
         });
         clearSignature('rad');
         clearSignature('doc');
+        clearCardImage();
     }
 
     function deleteRecordFromList(id) {
@@ -567,7 +697,6 @@
         }
     }
 
-    // 現在編集中のデータを削除する
     function deleteCurrentRecord() {
         if(!currentRecordId) return;
         if(confirm('現在編集中のこの患者データを完全に削除しますか？')) {
@@ -577,37 +706,45 @@
         }
     }
 
-    // --- Excel出力処理 (ExcelJSを使用し、書式保持と画像添付に対応) ---
+    // --- Excel出力処理 ---
     async function exportToExcel() {
         if (!currentRecordId) {
             alert("患者データが選択されていません。");
             return;
         }
         
-        // 出力前に現在の入力を保存
-        saveToLocalStorage();
+        saveToLocalStorage(); // 出力前に保存
         
         const record = patientRecords.find(r => r.id === currentRecordId);
         if (!record) return;
 
-        // 値取得用のヘルパー関数
         const checkVal = (id) => record[id] ? "✓" : "";
         const getVal = (id) => record[id] || "";
+        
+        // 閾値の分割フォーマット取得ヘルパー
+        const getThVal = (prefix, type) => {
+            const v = record[`${prefix}-th-${type}-v`];
+            const ms = record[`${prefix}-th-${type}-ms`];
+            if(v || ms) return `${v || '-'} V / ${ms || '-'} ms`;
+            
+            // 旧フォーマットの互換性用
+            const old = record[`${prefix}-th-${type}`];
+            if(old) return old;
+            
+            return "";
+        };
 
-        // WorkbookとWorksheetの作成
         const wb = new ExcelJS.Workbook();
         const ws = wb.addWorksheet("Checklist");
 
-        // 列の幅を設定
         ws.columns = [
-            { width: 75 }, // A列: 項目名
-            { width: 20 }, // B列: 値1 (心房など)
-            { width: 20 }  // C列: 値2 (心室など)
+            { width: 75 }, // A列
+            { width: 22 }, // B列 (心房)
+            { width: 22 }  // C列 (心室)
         ];
 
         let currentRow = 1;
 
-        // ヘルパー関数: 行を追加してスタイルを適用
         const addRow = (values, isHeader = false, isSubHeader = false) => {
             const row = ws.addRow(values);
             row.eachCell((cell, colNumber) => {
@@ -615,11 +752,9 @@
                 cell.alignment = { vertical: 'middle', horizontal: isHeader ? 'center' : 'left', wrapText: true };
                 
                 if (isSubHeader) {
-                    // サブヘッダー（グレー背景色）
                     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
                     cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                } else if (!isHeader && values[0]) {
-                    // 通常セル（罫線あり）
+                } else if (!isHeader && values[0] && values[0] !== "■ MRI対応カード画像 (表面)") {
                     cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                 }
             });
@@ -632,7 +767,7 @@
         ws.mergeCells(`A${currentRow - 1}:C${currentRow - 1}`);
         titleRow.height = 30;
         titleRow.getCell(1).font = { name: 'Meiryo', size: 16, bold: true };
-        addRow([]); // 空行
+        addRow([]); 
 
         // 基本情報
         addRow(["■ 基本情報", "", ""], false, true);
@@ -640,11 +775,31 @@
         addRow(["患者名", getVal('patient-name'), ""]);
         addRow(["MRI検査オーダー日", getVal('order-date'), ""]);
         addRow(["MRI検査実施日", getVal('exam-date'), ""]);
-        addRow([]);
+        
+        // 写真画像のエクセル貼付処理
+        if (record['card-image']) {
+            addRow([]);
+            addRow(["■ MRI対応カード画像 (表面)", "", ""], false, true);
+            let cardRow = currentRow; // 次の行に配置
+            ws.getRow(cardRow).height = 200; // 行の高さを広げる
+            
+            const base64Img = record['card-image'].replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+            const imageId = wb.addImage({ base64: base64Img, extension: 'jpeg' });
+            
+            ws.addImage(imageId, {
+                tl: { col: 0, row: cardRow - 1 }, // A列
+                ext: { width: 350, height: 250 }
+            });
+            currentRow++; // 画像用の行をスキップ
+            addRow([]);
+        } else {
+            addRow([]);
+        }
 
         // ① オーダ前
         addRow(["■ ① オーダ前（条件適応判断）", "", ""], false, true);
         const tab1Items = [
+            ["MRI対応デバイスの組み合わせ検索サイトで条件適応を確認した", 'chk1-0'],
             ["患者様より条件付きMRI対応カードの提示がある", 'chk1-1'],
             ["患者様より条件付きMRIペースメーカの手帳の提示がある", 'chk1-2'],
             ["ペースメーカ植込み後6週間を超えている", 'chk1-3'],
@@ -665,7 +820,7 @@
         addRow(["■ ② MRI検査前", "心房", "心室"], false, true);
         addRow(["Bipolar Pacingである", checkVal('chk2-1'), ""]);
         addRow(["リードインピーダンス (200～2000 Ω)", getVal('pre-imp-a'), getVal('pre-imp-v')]);
-        addRow(["ペーシング閾値 (2.0 V / 0.4 ms以下)", getVal('pre-th-a'), getVal('pre-th-v')]);
+        addRow(["ペーシング閾値 (2.0 V / 0.4 ms以下)", getThVal('pre', 'a'), getThVal('pre', 'v')]);
         addRow(["波高値 (横隔膜ツイッチング無)", getVal('pre-amp-a'), getVal('pre-amp-v')]);
         addRow(["MRI撮像中モード指示 / レート", getVal('mri-mode'), getVal('mri-rate')]);
         addRow([]);
@@ -681,17 +836,13 @@
         ];
         tab3Items.forEach(item => addRow([item[0], checkVal(item[1]), ""]));
         
-        // 放射線課 署名画像追加処理
+        // 放射線課 署名画像
         addRow(["放射線課 署名", "", ""]);
-        let radRow = currentRow - 1; // 署名が記述されている行 (1-based index)
-        ws.getRow(radRow).height = 65; // 画像を入れるために行の高さを広げる
-        
+        let radRow = currentRow - 1;
+        ws.getRow(radRow).height = 65; 
         if (record['sig-rad'] && record['sig-rad'].length > 100) {
-            // DataURLからBase64文字列を抽出
             const base64Img = record['sig-rad'].replace(/^data:image\/(png|jpg);base64,/, "");
             const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
-            
-            // B列(col:1)に画像を配置 (ExcelJSの tl は0-based index)
             ws.addImage(imageId, {
                 tl: { col: 1, row: radRow - 1 },
                 ext: { width: 160, height: 60 }
@@ -704,18 +855,16 @@
         addRow(["設定戻しの確認を行った", checkVal('chk4-1'), ""]);
         addRow(["前データとの変動が無い事を確認した", checkVal('chk4-2'), ""]);
         addRow(["リードインピーダンス", getVal('post-imp-a'), getVal('post-imp-v')]);
-        addRow(["ペーシング閾値", getVal('post-th-a'), getVal('post-th-v')]);
+        addRow(["ペーシング閾値", getThVal('post', 'a'), getThVal('post', 'v')]);
         addRow(["波高値", getVal('post-amp-a'), getVal('post-amp-v')]);
         
-        // 循環器内科 医師署名画像追加処理
+        // 循環器内科 医師署名画像
         addRow(["循環器内科 医師署名", "", ""]);
         let docRow = currentRow - 1;
         ws.getRow(docRow).height = 65;
-
         if (record['sig-doc'] && record['sig-doc'].length > 100) {
             const base64Img = record['sig-doc'].replace(/^data:image\/(png|jpg);base64,/, "");
             const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
-            
             ws.addImage(imageId, {
                 tl: { col: 1, row: docRow - 1 },
                 ext: { width: 160, height: 60 }
@@ -732,19 +881,15 @@
     // 初期化処理
     window.onload = function() {
         initCanvases();
+        initCamera(); // カメラ初期化
         
-        // 入力イベントリスナーの追加（入力があるたびに自動保存）
+        // 入力イベントリスナーの追加（入力枠からカーソルが外れた時に自動保存）
         const elements = document.querySelectorAll('.save-target');
         elements.forEach(el => {
             el.addEventListener('change', saveToLocalStorage);
-            if(el.type === 'text' || el.type === 'number') {
-                el.addEventListener('input', () => {
-                    saveToLocalStorage();
-                });
-            }
         });
 
-        // 保存されたリストの読み込みと一覧画面の表示
+        // 読み込みと一覧表示
         loadRecords();
     };
 </script>
