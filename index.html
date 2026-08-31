@@ -98,22 +98,87 @@
         <!-- 基本情報 -->
         <div class="patient-info">
             <div>
-                <label>モード</label>
-                <select id="mri-mode" class="save-target">
-                    <option value="">選択してください</option>
-                    <option value="DOO">DOO</option>
-                    <option value="VOO">VOO</option>
-                    <option value="AOO">AOO</option>
-                    <option value="ODO">ODO</option>
-                </select>
+                <label>患者ID</label>
+                <input type="text" id="patient-id" class="save-target" placeholder="IDを入力">
             </div>
             <div>
-                <label>レート (30～120ppm ※65不可)</label>
-                <input type="number" id="mri-rate" class="save-target" placeholder="ppm">
+                <label>患者名</label>
+                <input type="text" id="patient-name" class="save-target" placeholder="氏名を入力">
+            </div>
+            <div>
+                <label>MRI検査オーダー日</label>
+                <input type="date" id="order-date" class="save-target">
+            </div>
+            <div>
+                <label>MRI検査実施日</label>
+                <input type="date" id="exam-date" class="save-target">
             </div>
         </div>
-        <p class="alert">※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。</p>
-    </div>
+
+        <!-- タブメニュー -->
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'tab1')">① オーダ前</div>
+            <div class="tab" onclick="openTab(event, 'tab2')">② MRI検査前</div>
+            <div class="tab" onclick="openTab(event, 'tab3')">③ MRI検査時</div>
+            <div class="tab" onclick="openTab(event, 'tab4')">④ MRI検査後</div>
+        </div>
+
+        <!-- オーダ前 -->
+        <div id="tab1" class="tab-content active">
+            <h3>条件適応判断</h3>
+            <label class="check-item"><input type="checkbox" id="chk1-1" class="save-target"> <span>患者様より条件付きMRI対応カードの提示がある</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-2" class="save-target"> <span>患者様より条件付きMRIペースメーカの手帳の提示がある</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-3" class="save-target"> <span>ペースメーカ植込み後6週間を超えている</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-4" class="save-target"> <span>ペースメーカは胸部植え込みである</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-5" class="save-target"> <span>本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-6" class="save-target"> <span>MRI対応していないリード及びリードアダプタが植え込まれていない</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-7" class="save-target"> <span>ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-8" class="save-target"> <span>患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える。</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-9" class="save-target"> <span>MRI検査当日、ペースメーカチェックにおいて条件を満たしていないと撮影できないことがあると伝える。</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-10" class="save-target"> <span>条件がクリアしていれば第2MRI（1301）へ連絡しオーダ日時をレントゲン技師に伝える。</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-11" class="save-target"> <span>カルテ、Prof⇒インプラント⇒ペースメーカー装着日が記入されているか確認</span></label>
+            <label class="check-item"><input type="checkbox" id="chk1-12" class="save-target"> <span>MRIカード持っていない場合は電子カルテでX-pを確認し外されたリードが残存していないことを確認する</span></label>
+        </div>
+
+        <!-- MRI検査前 -->
+        <div id="tab2" class="tab-content">
+            <h3>ペースメーカチェック</h3>
+            <label class="check-item"><input type="checkbox" id="chk2-1" class="save-target"> <span>Bipolar Pacingである</span></label>
+            
+            <div class="measure-grid">
+                <div>計測項目</div><div>心房</div><div>心室</div>
+                <label>リードインピーダンス (200～2000 Ω)</label>
+                <input type="text" id="pre-imp-a" class="save-target" placeholder="Ω">
+                <input type="text" id="pre-imp-v" class="save-target" placeholder="Ω">
+                
+                <label>ペーシング閾値 (2.0 V / 0.4 ms以下)</label>
+                <input type="text" id="pre-th-a" class="save-target" placeholder="V">
+                <input type="text" id="pre-th-v" class="save-target" placeholder="V">
+                
+                <label>波高値 (横隔膜ツイッチング無)</label>
+                <input type="text" id="pre-amp-a" class="save-target" placeholder="mV">
+                <input type="text" id="pre-amp-v" class="save-target" placeholder="mV">
+            </div>
+
+            <h3 style="margin-top: 20px;">MRI撮像中モード指示</h3>
+            <div class="patient-info">
+                <div>
+                    <label>モード</label>
+                    <select id="mri-mode" class="save-target">
+                        <option value="">選択してください</option>
+                        <option value="DOO">DOO</option>
+                        <option value="VOO">VOO</option>
+                        <option value="AOO">AOO</option>
+                        <option value="ODO">ODO</option>
+                    </select>
+                </div>
+                <div>
+                    <label>レート (30～120ppm ※65不可)</label>
+                    <input type="number" id="mri-rate" class="save-target" placeholder="ppm">
+                </div>
+            </div>
+            <p class="alert">※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。</p>
+        </div>
 
     <!-- MRI検査時 -->
     <div id="tab3" class="tab-content">
@@ -183,9 +248,16 @@
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
-        document.getElementById(tabName).style.display = "block";
-        document.getElementById(tabName).className += " active";
-        evt.currentTarget.className += " active";
+        
+        const targetTab = document.getElementById(tabName);
+        if(targetTab) {
+            targetTab.style.display = "block";
+            targetTab.className += " active";
+        }
+        
+        if(evt && evt.currentTarget) {
+            evt.currentTarget.className += " active";
+        }
         
         // タブ切り替え時にキャンバスのサイズを調整（非表示時にサイズがおかしくなる対策）
         resizeCanvas('sig-canvas-rad');
@@ -414,8 +486,11 @@
 
     function updateCurrentRecordInfo() {
         if (!currentRecordId) return;
-        const pId = document.getElementById('patient-id').value || '未入力';
-        const pName = document.getElementById('patient-name').value || '未入力';
+        const pIdElement = document.getElementById('patient-id');
+        const pNameElement = document.getElementById('patient-name');
+        
+        const pId = pIdElement ? (pIdElement.value || '未入力') : '未入力';
+        const pName = pNameElement ? (pNameElement.value || '未入力') : '未入力';
         document.getElementById('current-record-info').innerText = `編集中: ${pId} ${pName}`;
     }
 
@@ -426,8 +501,12 @@
         // フォームをクリア
         clearFormElements();
         
+        // ★新規作成時に空データを即座に保存（一覧にすぐ表示させるため）
+        saveToLocalStorage();
+        
         // 最初のタブを開く
-        openTab({currentTarget: document.querySelector('.tab')}, 'tab1');
+        const firstTab = document.querySelector('.tab');
+        openTab(firstTab ? {currentTarget: firstTab} : null, 'tab1');
         
         // 詳細画面を表示
         document.getElementById('list-view').style.display = 'none';
@@ -478,7 +557,8 @@
             }
             
             // 最初のタブを開く
-            openTab({currentTarget: document.querySelector('.tab')}, 'tab1');
+            const firstTab = document.querySelector('.tab');
+            openTab(firstTab ? {currentTarget: firstTab} : null, 'tab1');
             
             document.getElementById('list-view').style.display = 'none';
             document.getElementById('detail-view').style.display = 'block';
