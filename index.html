@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ボストン PMチェックリスト (MRI検査)</title>
-    <!-- Excel出力用ライブラリ (SheetJS) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Excel出力用ライブラリ (ExcelJS & FileSaver) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; }
         .container { max-width: 900px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -576,8 +577,8 @@
         }
     }
 
-    // --- Excel出力処理 ---
-    function exportToExcel() {
+    // --- Excel出力処理 (ExcelJSを使用し、書式保持と画像添付に対応) ---
+    async function exportToExcel() {
         if (!currentRecordId) {
             alert("患者データが選択されていません。");
             return;
@@ -592,71 +593,140 @@
         // 値取得用のヘルパー関数
         const checkVal = (id) => record[id] ? "✓" : "";
         const getVal = (id) => record[id] || "";
-        const isSigned = (key) => record[`sig-${key}`] && record[`sig-${key}`].length > 100 ? "（署名済み）" : "未署名";
 
-        // Excelに書き出すデータ配列 (行・列)
-        const ws_data = [
-            ["ボストン PMチェックリスト (MRI検査)"],
-            [],
-            ["■ 基本情報"],
-            ["患者ID", getVal('patient-id')],
-            ["患者名", getVal('patient-name')],
-            ["MRI検査オーダー日", getVal('order-date')],
-            ["MRI検査実施日", getVal('exam-date')],
-            [],
-            ["■ ① オーダ前（条件適応判断）"],
-            ["患者様より条件付きMRI対応カードの提示がある", checkVal('chk1-1')],
-            ["患者様より条件付きMRIペースメーカの手帳の提示がある", checkVal('chk1-2')],
-            ["ペースメーカ植込み後6週間を超えている", checkVal('chk1-3')],
-            ["ペースメーカは胸部植え込みである", checkVal('chk1-4')],
-            ["本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと", checkVal('chk1-5')],
-            ["MRI対応していないリード及びリードアダプタが植え込まれていない", checkVal('chk1-6')],
-            ["ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い", checkVal('chk1-7')],
-            ["患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える。", checkVal('chk1-8')],
-            ["MRI検査当日、ペースメーカチェックにおいて条件を満たしていないと撮影できないことがあると伝える。", checkVal('chk1-9')],
-            ["条件がクリアしていれば第2MRI（1301）へ連絡しオーダ日時をレントゲン技師に伝える。", checkVal('chk1-10')],
-            ["カルテ、Prof⇒インプラント⇒ペースメーカー装着日が記入されているか確認", checkVal('chk1-11')],
-            ["MRIカード持っていない場合は電子カルテでX-pを確認し外されたリードが残存していないことを確認する", checkVal('chk1-12')],
-            [],
-            ["■ ② MRI検査前"],
-            ["Bipolar Pacingである", checkVal('chk2-1')],
-            ["[計測項目]", "心房", "心室"],
-            ["リードインピーダンス (200～2000 Ω)", getVal('pre-imp-a'), getVal('pre-imp-v')],
-            ["ペーシング閾値 (2.0 V / 0.4 ms以下)", getVal('pre-th-a'), getVal('pre-th-v')],
-            ["波高値 (横隔膜ツイッチング無)", getVal('pre-amp-a'), getVal('pre-amp-v')],
-            ["MRI撮像中モード指示", getVal('mri-mode')],
-            ["MRI撮像中レート", getVal('mri-rate')],
-            [],
-            ["■ ③ MRI検査時"],
-            ["撮像は側臥位ではない", checkVal('chk3-1')],
-            ["一軸あたりの最大勾配スルーレートが 200 T/m/s 以下", checkVal('chk3-2')],
-            ["全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満", checkVal('chk3-3')],
-            ["送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと", checkVal('chk3-4')],
-            ["患者動態モニタリングを行えている", checkVal('chk3-5')],
-            ["放射線課 署名", isSigned('rad')],
-            [],
-            ["■ ④ MRI検査後"],
-            ["設定戻しの確認を行った", checkVal('chk4-1')],
-            ["前データとの変動が無い事を確認した", checkVal('chk4-2')],
-            ["[計測項目]", "心房", "心室"],
-            ["リードインピーダンス", getVal('post-imp-a'), getVal('post-imp-v')],
-            ["ペーシング閾値", getVal('post-th-a'), getVal('post-th-v')],
-            ["波高値", getVal('post-amp-a'), getVal('post-amp-v')],
-            ["循環器内科 医師署名", isSigned('doc')]
+        // WorkbookとWorksheetの作成
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet("Checklist");
+
+        // 列の幅を設定
+        ws.columns = [
+            { width: 75 }, // A列: 項目名
+            { width: 20 }, // B列: 値1 (心房など)
+            { width: 20 }  // C列: 値2 (心室など)
         ];
 
-        // シート作成
-        const ws = XLSX.utils.aoa_to_sheet(ws_data);
-        // 列幅の調整（見やすくするため）
-        ws['!cols'] = [ {wch: 75}, {wch: 15}, {wch: 15} ];
+        let currentRow = 1;
 
-        // ワークブック作成とファイル書き出し
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Checklist");
+        // ヘルパー関数: 行を追加してスタイルを適用
+        const addRow = (values, isHeader = false, isSubHeader = false) => {
+            const row = ws.addRow(values);
+            row.eachCell((cell, colNumber) => {
+                cell.font = { name: 'Meiryo', size: 11, bold: isHeader || isSubHeader };
+                cell.alignment = { vertical: 'middle', horizontal: isHeader ? 'center' : 'left', wrapText: true };
+                
+                if (isSubHeader) {
+                    // サブヘッダー（グレー背景色）
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
+                    cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                } else if (!isHeader && values[0]) {
+                    // 通常セル（罫線あり）
+                    cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                }
+            });
+            currentRow++;
+            return row;
+        };
+
+        // タイトル
+        const titleRow = addRow(["ボストン PMチェックリスト (MRI検査)", "", ""], true);
+        ws.mergeCells(`A${currentRow - 1}:C${currentRow - 1}`);
+        titleRow.height = 30;
+        titleRow.getCell(1).font = { name: 'Meiryo', size: 16, bold: true };
+        addRow([]); // 空行
+
+        // 基本情報
+        addRow(["■ 基本情報", "", ""], false, true);
+        addRow(["患者ID", getVal('patient-id'), ""]);
+        addRow(["患者名", getVal('patient-name'), ""]);
+        addRow(["MRI検査オーダー日", getVal('order-date'), ""]);
+        addRow(["MRI検査実施日", getVal('exam-date'), ""]);
+        addRow([]);
+
+        // ① オーダ前
+        addRow(["■ ① オーダ前（条件適応判断）", "", ""], false, true);
+        const tab1Items = [
+            ["患者様より条件付きMRI対応カードの提示がある", 'chk1-1'],
+            ["患者様より条件付きMRIペースメーカの手帳の提示がある", 'chk1-2'],
+            ["ペースメーカ植込み後6週間を超えている", 'chk1-3'],
+            ["ペースメーカは胸部植え込みである", 'chk1-4'],
+            ["本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと", 'chk1-5'],
+            ["MRI対応していないリード及びリードアダプタが植え込まれていない", 'chk1-6'],
+            ["ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い", 'chk1-7'],
+            ["患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える。", 'chk1-8'],
+            ["MRI検査当日、ペースメーカチェックにおいて条件を満たしていないと撮影できないことがあると伝える。", 'chk1-9'],
+            ["条件がクリアしていれば第2MRI（1301）へ連絡しオーダ日時をレントゲン技師に伝える。", 'chk1-10'],
+            ["カルテ、Prof⇒インプラント⇒ペースメーカー装着日が記入されているか確認", 'chk1-11'],
+            ["MRIカード持っていない場合は電子カルテでX-pを確認し外されたリードが残存していないことを確認する", 'chk1-12']
+        ];
+        tab1Items.forEach(item => addRow([item[0], checkVal(item[1]), ""]));
+        addRow([]);
+
+        // ② MRI検査前
+        addRow(["■ ② MRI検査前", "心房", "心室"], false, true);
+        addRow(["Bipolar Pacingである", checkVal('chk2-1'), ""]);
+        addRow(["リードインピーダンス (200～2000 Ω)", getVal('pre-imp-a'), getVal('pre-imp-v')]);
+        addRow(["ペーシング閾値 (2.0 V / 0.4 ms以下)", getVal('pre-th-a'), getVal('pre-th-v')]);
+        addRow(["波高値 (横隔膜ツイッチング無)", getVal('pre-amp-a'), getVal('pre-amp-v')]);
+        addRow(["MRI撮像中モード指示 / レート", getVal('mri-mode'), getVal('mri-rate')]);
+        addRow([]);
+
+        // ③ MRI検査時
+        addRow(["■ ③ MRI検査時", "", ""], false, true);
+        const tab3Items = [
+            ["撮像は側臥位ではない", 'chk3-1'],
+            ["一軸あたりの最大勾配スルーレートが 200 T/m/s 以下", 'chk3-2'],
+            ["全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満", 'chk3-3'],
+            ["送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと", 'chk3-4'],
+            ["患者動態モニタリングを行えている", 'chk3-5']
+        ];
+        tab3Items.forEach(item => addRow([item[0], checkVal(item[1]), ""]));
         
-        // IDを含めたファイル名でダウンロード
+        // 放射線課 署名画像追加処理
+        addRow(["放射線課 署名", "", ""]);
+        let radRow = currentRow - 1; // 署名が記述されている行 (1-based index)
+        ws.getRow(radRow).height = 65; // 画像を入れるために行の高さを広げる
+        
+        if (record['sig-rad'] && record['sig-rad'].length > 100) {
+            // DataURLからBase64文字列を抽出
+            const base64Img = record['sig-rad'].replace(/^data:image\/(png|jpg);base64,/, "");
+            const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
+            
+            // B列(col:1)に画像を配置 (ExcelJSの tl は0-based index)
+            ws.addImage(imageId, {
+                tl: { col: 1, row: radRow - 1 },
+                ext: { width: 160, height: 60 }
+            });
+        }
+        addRow([]);
+
+        // ④ MRI検査後
+        addRow(["■ ④ MRI検査後", "心房", "心室"], false, true);
+        addRow(["設定戻しの確認を行った", checkVal('chk4-1'), ""]);
+        addRow(["前データとの変動が無い事を確認した", checkVal('chk4-2'), ""]);
+        addRow(["リードインピーダンス", getVal('post-imp-a'), getVal('post-imp-v')]);
+        addRow(["ペーシング閾値", getVal('post-th-a'), getVal('post-th-v')]);
+        addRow(["波高値", getVal('post-amp-a'), getVal('post-amp-v')]);
+        
+        // 循環器内科 医師署名画像追加処理
+        addRow(["循環器内科 医師署名", "", ""]);
+        let docRow = currentRow - 1;
+        ws.getRow(docRow).height = 65;
+
+        if (record['sig-doc'] && record['sig-doc'].length > 100) {
+            const base64Img = record['sig-doc'].replace(/^data:image\/(png|jpg);base64,/, "");
+            const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
+            
+            ws.addImage(imageId, {
+                tl: { col: 1, row: docRow - 1 },
+                ext: { width: 160, height: 60 }
+            });
+        }
+
+        // ファイル書き出しとダウンロード
+        const buffer = await wb.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
         const fileName = `PM_Checklist_${getVal('patient-id') || 'unnamed'}.xlsx`;
-        XLSX.writeFile(wb, fileName);
+        saveAs(blob, fileName);
     }
 
     // 初期化処理
