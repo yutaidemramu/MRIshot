@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ボストン PMチェックリスト (MRI検査)</title>
+    <!-- Excel出力用ライブラリ (SheetJS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; }
         .container { max-width: 900px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -62,6 +64,9 @@
         
         .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
         .btn-back { background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-excel { background-color: #198754; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-excel:hover { background-color: #157347; }
+        .top-nav-right { display: flex; align-items: center; gap: 15px; }
     </style>
 </head>
 <body>
@@ -92,7 +97,10 @@
     <div id="detail-view">
         <div class="top-nav">
             <button class="btn-back" onclick="showListView()">← 一覧に戻る (自動保存されます)</button>
-            <span id="current-record-info" style="font-weight: bold; color: #0056b3;"></span>
+            <div class="top-nav-right">
+                <span id="current-record-info" style="font-weight: bold; color: #0056b3;"></span>
+                <button class="btn-excel" onclick="exportToExcel()">Excel出力</button>
+            </div>
         </div>
         
         <!-- 基本情報 -->
@@ -192,7 +200,7 @@
         <!-- 放射線課 署名欄 -->
         <div class="signature-area">
             <label>放射線課 署名（印）</label>
-            <canvas id="sig-canvas-rad"></canvas>
+            <canvas id="sig-canvas-rad" width="400" height="150"></canvas>
             <button class="btn-clear" onclick="clearSignature('rad')">クリア</button>
         </div>
     </div>
@@ -221,7 +229,7 @@
         <!-- 循環器内科 医師署名欄 -->
         <div class="signature-area">
             <label>循環器内科 医師署名（印）</label>
-            <canvas id="sig-canvas-doc"></canvas>
+            <canvas id="sig-canvas-doc" width="400" height="150"></canvas>
             <button class="btn-clear" onclick="clearSignature('doc')">クリア</button>
         </div>
     </div>
@@ -258,10 +266,6 @@
         if(evt && evt.currentTarget) {
             evt.currentTarget.className += " active";
         }
-        
-        // タブ切り替え時にキャンバスのサイズを調整（非表示時にサイズがおかしくなる対策）
-        resizeCanvas('sig-canvas-rad');
-        resizeCanvas('sig-canvas-doc');
     }
 
     // --- サイン（Canvas）処理 ---
@@ -278,9 +282,6 @@
             const canvas = canvases[key];
             const ctx = canvas.getContext('2d');
             contexts[key] = ctx;
-            
-            // サイズ設定
-            resizeCanvas(canvas.id);
             
             // スタイル設定
             ctx.strokeStyle = '#000';
@@ -299,22 +300,6 @@
             canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
             canvas.addEventListener('touchend', stopDrawing);
         }
-    }
-
-    function resizeCanvas(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        if(!canvas) return;
-        const rect = canvas.parentElement.getBoundingClientRect();
-        // 実際のピクセルサイズを設定
-        canvas.width = rect.width > 400 ? 400 : rect.width - 20; // 余白考慮
-        canvas.height = 150;
-        
-        // リサイズ時にコンテキスト設定がリセットされるため再設定
-        const ctx = canvas.getContext('2d');
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
     }
 
     function getMousePos(canvas, evt) {
@@ -512,12 +497,6 @@
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
         updateCurrentRecordInfo();
-        
-        // 新規作成時もキャンバスのサイズを初期化
-        setTimeout(() => {
-            resizeCanvas('sig-canvas-rad');
-            resizeCanvas('sig-canvas-doc');
-        }, 50);
     }
 
     function editRecord(id) {
@@ -597,33 +576,93 @@
         }
     }
 
+    // --- Excel出力処理 ---
+    function exportToExcel() {
+        if (!currentRecordId) {
+            alert("患者データが選択されていません。");
+            return;
+        }
+        
+        // 出力前に現在の入力を保存
+        saveToLocalStorage();
+        
+        const record = patientRecords.find(r => r.id === currentRecordId);
+        if (!record) return;
+
+        // 値取得用のヘルパー関数
+        const checkVal = (id) => record[id] ? "✓" : "";
+        const getVal = (id) => record[id] || "";
+        const isSigned = (key) => record[`sig-${key}`] && record[`sig-${key}`].length > 100 ? "（署名済み）" : "未署名";
+
+        // Excelに書き出すデータ配列 (行・列)
+        const ws_data = [
+            ["ボストン PMチェックリスト (MRI検査)"],
+            [],
+            ["■ 基本情報"],
+            ["患者ID", getVal('patient-id')],
+            ["患者名", getVal('patient-name')],
+            ["MRI検査オーダー日", getVal('order-date')],
+            ["MRI検査実施日", getVal('exam-date')],
+            [],
+            ["■ ① オーダ前（条件適応判断）"],
+            ["患者様より条件付きMRI対応カードの提示がある", checkVal('chk1-1')],
+            ["患者様より条件付きMRIペースメーカの手帳の提示がある", checkVal('chk1-2')],
+            ["ペースメーカ植込み後6週間を超えている", checkVal('chk1-3')],
+            ["ペースメーカは胸部植え込みである", checkVal('chk1-4')],
+            ["本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと", checkVal('chk1-5')],
+            ["MRI対応していないリード及びリードアダプタが植え込まれていない", checkVal('chk1-6')],
+            ["ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い", checkVal('chk1-7')],
+            ["患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える。", checkVal('chk1-8')],
+            ["MRI検査当日、ペースメーカチェックにおいて条件を満たしていないと撮影できないことがあると伝える。", checkVal('chk1-9')],
+            ["条件がクリアしていれば第2MRI（1301）へ連絡しオーダ日時をレントゲン技師に伝える。", checkVal('chk1-10')],
+            ["カルテ、Prof⇒インプラント⇒ペースメーカー装着日が記入されているか確認", checkVal('chk1-11')],
+            ["MRIカード持っていない場合は電子カルテでX-pを確認し外されたリードが残存していないことを確認する", checkVal('chk1-12')],
+            [],
+            ["■ ② MRI検査前"],
+            ["Bipolar Pacingである", checkVal('chk2-1')],
+            ["[計測項目]", "心房", "心室"],
+            ["リードインピーダンス (200～2000 Ω)", getVal('pre-imp-a'), getVal('pre-imp-v')],
+            ["ペーシング閾値 (2.0 V / 0.4 ms以下)", getVal('pre-th-a'), getVal('pre-th-v')],
+            ["波高値 (横隔膜ツイッチング無)", getVal('pre-amp-a'), getVal('pre-amp-v')],
+            ["MRI撮像中モード指示", getVal('mri-mode')],
+            ["MRI撮像中レート", getVal('mri-rate')],
+            [],
+            ["■ ③ MRI検査時"],
+            ["撮像は側臥位ではない", checkVal('chk3-1')],
+            ["一軸あたりの最大勾配スルーレートが 200 T/m/s 以下", checkVal('chk3-2')],
+            ["全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満", checkVal('chk3-3')],
+            ["送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと", checkVal('chk3-4')],
+            ["患者動態モニタリングを行えている", checkVal('chk3-5')],
+            ["放射線課 署名", isSigned('rad')],
+            [],
+            ["■ ④ MRI検査後"],
+            ["設定戻しの確認を行った", checkVal('chk4-1')],
+            ["前データとの変動が無い事を確認した", checkVal('chk4-2')],
+            ["[計測項目]", "心房", "心室"],
+            ["リードインピーダンス", getVal('post-imp-a'), getVal('post-imp-v')],
+            ["ペーシング閾値", getVal('post-th-a'), getVal('post-th-v')],
+            ["波高値", getVal('post-amp-a'), getVal('post-amp-v')],
+            ["循環器内科 医師署名", isSigned('doc')]
+        ];
+
+        // シート作成
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        // 列幅の調整（見やすくするため）
+        ws['!cols'] = [ {wch: 75}, {wch: 15}, {wch: 15} ];
+
+        // ワークブック作成とファイル書き出し
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Checklist");
+        
+        // IDを含めたファイル名でダウンロード
+        const fileName = `PM_Checklist_${getVal('patient-id') || 'unnamed'}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    }
+
     // 初期化処理
     window.onload = function() {
         initCanvases();
         
-        // 画面リサイズ時にキャンバスのサイズも調整
-        window.addEventListener('resize', () => {
-            if (document.getElementById('detail-view').style.display === 'block') {
-                 resizeCanvas('sig-canvas-rad');
-                 resizeCanvas('sig-canvas-doc');
-                 // リサイズするとキャンバスが消えるので、現在のレコードデータから再描画
-                 if(currentRecordId) {
-                     const record = patientRecords.find(r => r.id === currentRecordId);
-                     if(record) {
-                         for (let key in canvases) {
-                            if (record[`sig-${key}`]) {
-                                const img = new Image();
-                                img.onload = function() {
-                                    contexts[key].drawImage(img, 0, 0);
-                                };
-                                img.src = record[`sig-${key}`];
-                            }
-                        }
-                     }
-                 }
-            }
-        });
-
         // 入力イベントリスナーの追加（入力があるたびに自動保存）
         const elements = document.querySelectorAll('.save-target');
         elements.forEach(el => {
