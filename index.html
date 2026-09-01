@@ -8,78 +8,82 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; }
-        .container { max-width: 900px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { font-size: 24px; color: #0056b3; text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; }
+        body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 10px; }
+        .container { max-width: 920px; margin: 20px auto; background: #fff; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        h1 { font-size: 22px; color: #0056b3; text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top: 0; margin-bottom: 20px; }
         
         /* Patient Info & Camera */
         .patient-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #e9ecef; padding: 15px; border-radius: 6px; }
         .patient-info div { display: flex; flex-direction: column; }
-        .patient-info label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        .patient-info input, .patient-info select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        .camera-area { background: #dce3e8; padding: 15px; border-radius: 6px; grid-column: 1 / -1; align-items: flex-start; }
-        .btn-camera { background: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;}
+        .patient-info label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
+        .patient-info input, .patient-info select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background: #fff; }
+        .camera-area { background: #dce3e8; padding: 15px; border-radius: 6px; grid-column: 1 / -1; }
+        .btn-camera { background: #17a2b8; color: white; border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
         .btn-camera:hover { background: #138496; }
 
         /* Tabs */
         .tabs { display: flex; border-bottom: 2px solid #0056b3; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; }
-        .tab { flex: 1; padding: 12px; cursor: pointer; background: #f8f9fa; border: 1px solid #dee2e6; border-bottom: none; text-align: center; font-weight: bold; transition: 0.2s; min-width: 100px; }
+        .tab { flex: 1; padding: 12px 10px; cursor: pointer; background: #f8f9fa; border: 1px solid #dee2e6; border-bottom: none; text-align: center; font-weight: bold; font-size: 14px; transition: 0.2s; min-width: 100px; }
         .tab.active { background: #0056b3; color: #fff; border-color: #0056b3; }
         .tab:hover:not(.active) { background: #e2e6ea; }
         
         /* Tab Content */
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active { display: block; animation: fadeIn 0.25s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Checkbox & Form Styles */
-        .check-item { display: flex; align-items: flex-start; margin-bottom: 12px; padding: 8px; background: #f8f9fa; border-radius: 4px; }
-        .check-item input[type="checkbox"] { margin-top: 4px; margin-right: 12px; transform: scale(1.2); }
-        .check-item label { cursor: pointer; width: 100%; }
+        .check-item { display: flex; align-items: flex-start; margin-bottom: 12px; padding: 9px 12px; background: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef; }
+        .check-item input[type="checkbox"] { margin-top: 3px; margin-right: 12px; transform: scale(1.25); cursor: pointer; }
+        .check-item label, .check-item span { cursor: pointer; width: 100%; font-size: 14px; line-height: 1.5; }
         
-        .measure-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 10px; align-items: start; }
-        .measure-grid input[type="text"] { padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box;}
-        .measure-grid > div.header-col { font-weight: bold; background: #e9ecef; padding: 8px; text-align: center; }
+        .measure-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 12px; align-items: center; }
+        .measure-grid input[type="text"], .measure-grid input[type="number"] { padding: 7px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 14px; }
+        .measure-grid > div.header-col { font-weight: bold; background: #e9ecef; padding: 8px; text-align: center; font-size: 14px; border-radius: 4px; }
         
-        /* 分割入力・前データ表示用 */
+        /* Compound inputs & previous data display */
         .compound-input { display: flex; align-items: center; gap: 4px; }
-        .compound-input input { width: 100%; min-width: 40px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
+        .compound-input input { width: 100%; min-width: 40px; padding: 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .prev-value { font-size: 12px; color: #dc3545; font-weight: bold; text-align: left; margin-bottom: 4px; display: block; }
         
-        /* 署名エリア */
-        .signature-area { margin-top: 20px; background: #fff; border: 2px solid #0056b3; border-radius: 8px; padding: 15px; position: relative; }
-        .signature-area label { font-weight: bold; display: block; margin-bottom: 10px; color: #0056b3; }
-        canvas { border: 1px dashed #999; background: #fafafa; cursor: crosshair; display: block; width: 100%; max-width: 400px; height: 150px; touch-action: none; margin-bottom: 10px;}
-        .sig-buttons { display: flex; gap: 10px; }
-        .btn-sig-save { padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        /* Signature Canvas Area */
+        .signature-area { margin-top: 20px; background: #fafbfc; border: 2px solid #0056b3; border-radius: 8px; padding: 15px; }
+        .signature-area label { font-weight: bold; display: block; margin-bottom: 8px; color: #0056b3; font-size: 14px; }
+        canvas { border: 1px solid #999; background: #ffffff; cursor: crosshair; display: block; width: 100%; max-width: 420px; height: 160px; touch-action: none; margin-bottom: 10px; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .sig-buttons { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .btn-sig-save { padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
         .btn-sig-save:hover { background: #218838; }
-        .btn-clear { padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-clear { padding: 8px 14px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
         .btn-clear:hover { background: #5a6268; }
-        .sig-status { display: inline-block; margin-left: 10px; font-weight: bold; color: #28a745; display: none; }
+        .sig-status { font-size: 13px; font-weight: bold; color: #28a745; display: none; }
 
-        .btn-reset { display: block; width: 100%; padding: 15px; background: #dc3545; color: #fff; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 30px; transition: 0.3s; }
+        .btn-reset { display: block; width: 100%; padding: 14px; background: #dc3545; color: #fff; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 30px; transition: 0.2s; }
         .btn-reset:hover { background: #c82333; }
         
-        .alert { font-size: 14px; color: #dc3545; font-weight: bold; margin-top: 10px; }
-        .save-status { text-align: center; font-size: 12px; color: #28a745; margin-top: 10px; display: none; }
+        .alert { font-size: 13px; color: #dc3545; font-weight: bold; margin-top: 10px; }
+        .save-status { text-align: center; font-size: 13px; color: #28a745; font-weight: bold; margin-top: 10px; display: none; }
 
-        /* Patient List Styles */
+        /* Patient List View Styles */
         #list-view { display: block; }
         #detail-view { display: none; }
-        .patient-list { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .patient-list th, .patient-list td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        .patient-list th { background-color: #0056b3; color: white; }
-        .patient-list tr:nth-child(even) { background-color: #f2f2f2; }
-        .patient-list tr:hover { background-color: #ddd; }
-        .btn-action { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 12px; }
+        .patient-list { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .patient-list th, .patient-list td { border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 14px; }
+        .patient-list th { background-color: #0056b3; color: white; font-weight: 600; }
+        .patient-list tr:nth-child(even) { background-color: #f8f9fa; }
+        .patient-list tr:hover { background-color: #e9ecef; }
+        .btn-action { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; margin-right: 6px; font-size: 13px; font-weight: bold; }
         .btn-edit { background-color: #28a745; color: white; }
+        .btn-edit:hover { background-color: #218838; }
         .btn-delete { background-color: #dc3545; color: white; }
-        .btn-new { background-color: #0056b3; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 20px; display: inline-block; }
+        .btn-delete:hover { background-color: #bd2130; }
+        .btn-new { background-color: #0056b3; color: white; padding: 11px 22px; font-size: 15px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 15px; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-new:hover { background-color: #004494; }
         
-        .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .btn-back { background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-excel { background-color: #198754; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-excel:hover { background-color: #157347; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .btn-back { background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-back:hover { background-color: #5a6268; }
+        .btn-excel { background-color: #198754; color: white; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-excel:hover { background-color: #146c43; }
         .top-nav-right { display: flex; align-items: center; gap: 15px; }
     </style>
 </head>
@@ -94,15 +98,15 @@
         <table class="patient-list">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>患者ID</th>
                     <th>患者名</th>
-                    <th>検査日</th>
-                    <th>最終更新</th>
+                    <th>検査実施日</th>
+                    <th>最終更新日時</th>
                     <th>操作</th>
                 </tr>
             </thead>
             <tbody id="patient-list-body">
-                <!-- リストがここに生成されます -->
+                <!-- リストが動的に生成されます -->
             </tbody>
         </table>
     </div>
@@ -110,10 +114,10 @@
     <!-- 詳細入力画面 -->
     <div id="detail-view">
         <div class="top-nav">
-            <button class="btn-back" onclick="showListView()">← 一覧に戻る (テキストは自動保存)</button>
+            <button class="btn-back" onclick="showListView()">← 一覧に戻る</button>
             <div class="top-nav-right">
                 <span id="current-record-info" style="font-weight: bold; color: #0056b3;"></span>
-                <button class="btn-excel" onclick="exportToExcel()">Excel出力</button>
+                <button class="btn-excel" onclick="exportToExcel()">📊 Excel出力</button>
             </div>
         </div>
         
@@ -137,10 +141,10 @@
             </div>
             <!-- カメラ領域 -->
             <div class="camera-area">
-                <label>MRI対応カード (表面) の写真保存</label>
+                <label style="display:block; margin-bottom:8px; font-weight:bold;">📷 MRI対応カード (表面) の写真保存</label>
                 <input type="file" id="card-image-input" accept="image/*" capture="environment" style="display:none;">
                 <button class="btn-camera" onclick="document.getElementById('card-image-input').click()">📷 カメラを起動 / 写真を選択</button>
-                <img id="card-image-preview" src="" style="display:none; max-width: 100%; max-height: 250px; margin-top: 15px; border: 2px solid #fff; border-radius:4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <img id="card-image-preview" src="" style="display:none; max-width: 100%; max-height: 250px; margin-top: 15px; border: 2px solid #fff; border-radius:4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
                 <button id="btn-clear-card" class="btn-clear" style="display:none; margin-top:10px;" onclick="clearCardImage()">写真を削除</button>
             </div>
         </div>
@@ -153,9 +157,9 @@
             <div class="tab" onclick="openTab(event, 'tab4')">④ MRI検査後</div>
         </div>
 
-        <!-- オーダ前 -->
+        <!-- ① オーダ前 -->
         <div id="tab1" class="tab-content active">
-            <h3>条件適応判断</h3>
+            <h3 style="color:#0056b3; margin-top:0;">条件適応判断</h3>
             <label class="check-item">
                 <input type="checkbox" id="chk1-0" class="save-target">
                 <span>
@@ -177,19 +181,19 @@
             <label class="check-item"><input type="checkbox" id="chk1-12" class="save-target"> <span>MRIカード持っていない場合は電子カルテでX-pを確認し外されたリードが残存していないことを確認する</span></label>
         </div>
 
-        <!-- MRI検査前 -->
+        <!-- ② MRI検査前 -->
         <div id="tab2" class="tab-content">
-            <h3>ペースメーカチェック</h3>
+            <h3 style="color:#0056b3; margin-top:0;">ペースメーカチェック</h3>
             <label class="check-item"><input type="checkbox" id="chk2-1" class="save-target"> <span>Bipolar Pacingである</span></label>
             
             <div class="measure-grid">
                 <div class="header-col">計測項目</div><div class="header-col">心房</div><div class="header-col">心室</div>
                 
-                <label>リードインピーダンス<br>(200～2000 Ω)</label>
+                <label>リードインピーダンス<br><small style="color:#666;">(200～2000 Ω)</small></label>
                 <div><input type="text" id="pre-imp-a" class="save-target" placeholder="Ω"></div>
                 <div><input type="text" id="pre-imp-v" class="save-target" placeholder="Ω"></div>
                 
-                <label>ペーシング閾値<br>(2.0 V / 0.4 ms以下)</label>
+                <label>ペーシング閾値<br><small style="color:#666;">(2.0 V / 0.4 ms以下)</small></label>
                 <div class="compound-input">
                     <input type="number" step="0.1" id="pre-th-a-v" class="save-target" placeholder="V"> / 
                     <input type="number" step="0.1" id="pre-th-a-ms" class="save-target" placeholder="ms">
@@ -199,13 +203,13 @@
                     <input type="number" step="0.1" id="pre-th-v-ms" class="save-target" placeholder="ms">
                 </div>
                 
-                <label>波高値<br>(横隔膜ツイッチング無)</label>
+                <label>波高値<br><small style="color:#666;">(横隔膜ツイッチング無)</small></label>
                 <div><input type="text" id="pre-amp-a" class="save-target" placeholder="mV"></div>
                 <div><input type="text" id="pre-amp-v" class="save-target" placeholder="mV"></div>
             </div>
 
-            <h3 style="margin-top: 20px;">MRI撮像中モード指示</h3>
-            <div class="patient-info">
+            <h3 style="color:#0056b3; margin-top: 25px;">MRI撮像中モード指示</h3>
+            <div class="patient-info" style="margin-bottom: 10px;">
                 <div>
                     <label>モード</label>
                     <select id="mri-mode" class="save-target">
@@ -224,9 +228,9 @@
             <p class="alert">※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。</p>
         </div>
 
-        <!-- MRI検査時 -->
+        <!-- ③ MRI検査時 -->
         <div id="tab3" class="tab-content">
-            <h3>MRI撮影時チェック</h3>
+            <h3 style="color:#0056b3; margin-top:0;">MRI撮影時チェック</h3>
             <label class="check-item"><input type="checkbox" id="chk3-1" class="save-target"> <span>撮像は側臥位ではない</span></label>
             <label class="check-item"><input type="checkbox" id="chk3-2" class="save-target"> <span>一軸あたりの最大勾配スルーレートが 200 T/m/s 以下</span></label>
             <label class="check-item"><input type="checkbox" id="chk3-3" class="save-target"> <span>全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満</span></label>
@@ -236,18 +240,18 @@
             <!-- 放射線課 署名欄 -->
             <div class="signature-area">
                 <label>放射線課 署名（印）</label>
-                <canvas id="sig-canvas-rad" width="400" height="150"></canvas>
+                <canvas id="sig-canvas-rad" width="420" height="160"></canvas>
                 <div class="sig-buttons">
                     <button class="btn-sig-save" onclick="saveSignature('rad')">✓ 署名を確定・保存</button>
                     <button class="btn-clear" onclick="clearSignature('rad')">書き直す</button>
-                    <span id="sig-status-rad" class="sig-status">保存済</span>
+                    <span id="sig-status-rad" class="sig-status">✓ 保存済</span>
                 </div>
             </div>
         </div>
 
-        <!-- MRI検査後 -->
+        <!-- ④ MRI検査後 -->
         <div id="tab4" class="tab-content">
-            <h3>設定戻しの確認</h3>
+            <h3 style="color:#0056b3; margin-top:0;">設定戻しの確認</h3>
             <label class="check-item"><input type="checkbox" id="chk4-1" class="save-target"> <span>設定戻しの確認を行った</span></label>
             <label class="check-item"><input type="checkbox" id="chk4-2" class="save-target"> <span>前データとの変動が無い事を確認した</span></label>
 
@@ -294,16 +298,16 @@
             <!-- 循環器内科 医師署名欄 -->
             <div class="signature-area">
                 <label>循環器内科 医師署名（印）</label>
-                <canvas id="sig-canvas-doc" width="400" height="150"></canvas>
+                <canvas id="sig-canvas-doc" width="420" height="160"></canvas>
                 <div class="sig-buttons">
                     <button class="btn-sig-save" onclick="saveSignature('doc')">✓ 署名を確定・保存</button>
                     <button class="btn-clear" onclick="clearSignature('doc')">書き直す</button>
-                    <span id="sig-status-doc" class="sig-status">保存済</span>
+                    <span id="sig-status-doc" class="sig-status">✓ 保存済</span>
                 </div>
             </div>
         </div>
 
-        <div id="save-msg" class="save-status">保存されました</div>
+        <div id="save-msg" class="save-status">自動保存されました</div>
         <button class="btn-reset" onclick="deleteCurrentRecord()">この患者データを削除する</button>
     </div> <!-- /detail-view -->
 </div>
@@ -341,7 +345,6 @@
         }
     }
 
-    // --- 「検査前データ」を検査後画面に反映する処理 ---
     function updatePrevDataDisplay() {
         const getDomVal = (id) => {
             const el = document.getElementById(id);
@@ -367,7 +370,6 @@
         document.getElementById('disp-pre-amp-v').innerText = preAmpV ? preAmpV + ' mV' : '-';
     }
 
-    // --- カメラ・写真処理 ---
     function initCamera() {
         document.getElementById('card-image-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -393,12 +395,12 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        cardImageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        cardImageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
                         
                         document.getElementById('card-image-preview').src = cardImageDataUrl;
                         document.getElementById('card-image-preview').style.display = 'block';
                         document.getElementById('btn-clear-card').style.display = 'inline-block';
-                        saveTextData(); // 写真もテキストデータと同時に保存
+                        saveTextData();
                     }
                     img.src = event.target.result;
                 }
@@ -416,8 +418,6 @@
         saveTextData();
     }
 
-
-    // --- サイン（Canvas）処理 ---
     const canvases = {
         'rad': document.getElementById('sig-canvas-rad'),
         'doc': document.getElementById('sig-canvas-doc')
@@ -425,6 +425,7 @@
     const contexts = {};
     let isDrawing = false;
     let currentContext = null;
+    let currentSigKey = null;
 
     function initCanvases() {
         for (let key in canvases) {
@@ -432,28 +433,25 @@
             const ctx = canvas.getContext('2d');
             contexts[key] = ctx;
             
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2.5;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousedown', (e) => startDrawing(e, key));
             canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('mouseup', () => stopDrawing(key));
+            canvas.addEventListener('mouseout', () => stopDrawing(key));
             
-            canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+            canvas.addEventListener('touchstart', (e) => handleTouchStart(e, key), {passive: false});
             canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
-            canvas.addEventListener('touchend', stopDrawing);
-            
-            // 書き始めたら「保存済」ステータスを消す
-            canvas.addEventListener('mousedown', () => hideSigStatus(key));
-            canvas.addEventListener('touchstart', () => hideSigStatus(key));
+            canvas.addEventListener('touchend', () => stopDrawing(key));
         }
     }
 
     function hideSigStatus(type) {
-        document.getElementById(`sig-status-${type}`).style.display = 'none';
+        const el = document.getElementById(`sig-status-${type}`);
+        if (el) el.style.display = 'none';
     }
 
     function getMousePos(canvas, evt) {
@@ -472,58 +470,94 @@
         };
     }
 
-    function startDrawing(e) {
+    function startDrawing(e, key) {
         isDrawing = true;
-        currentContext = e.target.getContext('2d');
-        const pos = getMousePos(e.target, e);
+        currentSigKey = key;
+        currentContext = canvases[key].getContext('2d');
+        hideSigStatus(key);
+        const pos = getMousePos(canvases[key], e);
         currentContext.beginPath();
         currentContext.moveTo(pos.x, pos.y);
     }
 
-    function handleTouchStart(e) {
+    function handleTouchStart(e, key) {
         e.preventDefault();
         isDrawing = true;
-        currentContext = e.target.getContext('2d');
-        const pos = getTouchPos(e.target, e);
+        currentSigKey = key;
+        currentContext = canvases[key].getContext('2d');
+        hideSigStatus(key);
+        const pos = getTouchPos(canvases[key], e);
         currentContext.beginPath();
         currentContext.moveTo(pos.x, pos.y);
     }
 
     function draw(e) {
-        if (!isDrawing || !currentContext) return;
-        const pos = getMousePos(e.target, e);
+        if (!isDrawing || !currentContext || !currentSigKey) return;
+        const pos = getMousePos(canvases[currentSigKey], e);
         currentContext.lineTo(pos.x, pos.y);
         currentContext.stroke();
     }
 
     function handleTouchMove(e) {
         e.preventDefault();
-        if (!isDrawing || !currentContext) return;
-        const pos = getTouchPos(e.target, e);
+        if (!isDrawing || !currentContext || !currentSigKey) return;
+        const pos = getTouchPos(canvases[currentSigKey], e);
         currentContext.lineTo(pos.x, pos.y);
         currentContext.stroke();
     }
 
-    function stopDrawing(e) {
+    function stopDrawing(key) {
         if(isDrawing) {
             isDrawing = false;
             currentContext = null;
+            // 一筆書き終えたら自動でサイン保存を実行
+            if (key) {
+                saveSignature(key, true);
+            }
         }
     }
 
-    // ★署名を明示的に保存する処理
-    function saveSignature(type) {
+    // キャンバスに描画があるかを判定し、白背景を敷いてDataURLを生成する関数
+    function getSignatureDataUrl(canvas) {
+        if (!canvas) return null;
+        const ctx = canvas.getContext('2d');
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        let hasDrawing = false;
+        
+        // ピクセルをスキャンして透明でないピクセルがあるか確認
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] > 20) { // アルファ値が20以上
+                hasDrawing = true;
+                break;
+            }
+        }
+        if (!hasDrawing) return null;
+
+        // 白背景を敷いた新しいキャンバスを作成して画像化（エクセルでの非表示化バグを完全に防止）
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tCtx = tempCanvas.getContext('2d');
+        tCtx.fillStyle = '#ffffff';
+        tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+        tCtx.drawImage(canvas, 0, 0);
+        return tempCanvas.toDataURL('image/png');
+    }
+
+    // 署名保存処理
+    function saveSignature(type, isAuto = false) {
         if (!currentRecordId) return;
         
-        // 現在のリストから該当レコードを取得
+        const dataUrl = getSignatureDataUrl(canvases[type]);
         const index = patientRecords.findIndex(r => r.id === currentRecordId);
+        
         if (index > -1) {
-            // キャンバスの画像データを直接レコードに保存
-            patientRecords[index][`sig-${type}`] = canvases[type].toDataURL();
+            if (dataUrl) {
+                patientRecords[index][`sig-${type}`] = dataUrl;
+                document.getElementById(`sig-status-${type}`).style.display = 'inline-block';
+            }
             localStorage.setItem('pm-mri-records', JSON.stringify(patientRecords));
-            
-            // 「保存済」を表示
-            document.getElementById(`sig-status-${type}`).style.display = 'inline-block';
         }
     }
 
@@ -532,7 +566,6 @@
         const ctx = contexts[type];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // クリアした状態を保存
         if (currentRecordId) {
             const index = patientRecords.findIndex(r => r.id === currentRecordId);
             if (index > -1) {
@@ -543,11 +576,10 @@
         }
     }
 
-    // --- メモリ（自動保存）機能 ---
     function showSaveMessage() {
         const msg = document.getElementById('save-msg');
         msg.style.display = 'block';
-        setTimeout(() => { msg.style.display = 'none'; }, 2000);
+        setTimeout(() => { msg.style.display = 'none'; }, 1800);
     }
 
     function checkCombiSearch() {
@@ -558,7 +590,6 @@
         }
     }
 
-    // ★テキストデータと写真のみを自動保存する（署名は保存しない）
     function saveTextData() {
         if (!currentRecordId) return;
 
@@ -590,11 +621,14 @@
         updatePrevDataDisplay(); 
     }
 
-    // --- 画面切り替えとリスト管理 ---
     function loadRecords() {
         const saved = localStorage.getItem('pm-mri-records');
         if (saved) {
-            patientRecords = JSON.parse(saved);
+            try {
+                patientRecords = JSON.parse(saved);
+            } catch(e) {
+                patientRecords = [];
+            }
         } else {
             patientRecords = [];
         }
@@ -606,11 +640,11 @@
         tbody.innerHTML = '';
         
         if (patientRecords.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">保存されているデータはありません</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#666;">保存されているデータはありません</td></tr>';
             return;
         }
 
-        const sortedRecords = [...patientRecords].sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
+        const sortedRecords = [...patientRecords].sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
 
         sortedRecords.forEach(record => {
             const tr = document.createElement('tr');
@@ -619,10 +653,10 @@
             const dispDate = record['exam-date'] || '-';
 
             tr.innerHTML = `
-                <td>${dispId}</td>
+                <td><strong>${dispId}</strong></td>
                 <td>${dispName}</td>
                 <td>${dispDate}</td>
-                <td style="font-size: 0.8em; color: #666;">${record.lastUpdated}</td>
+                <td style="font-size: 0.85em; color: #666;">${record.lastUpdated || '-'}</td>
                 <td>
                     <button class="btn-action btn-edit" onclick="editRecord('${record.id}')">編集</button>
                     <button class="btn-action btn-delete" onclick="deleteRecordFromList('${record.id}')">削除</button>
@@ -633,7 +667,12 @@
     }
 
     function showListView() {
-        if (currentRecordId) saveTextData();
+        if (currentRecordId) {
+            saveTextData();
+            // サインも保存
+            saveSignature('rad', true);
+            saveSignature('doc', true);
+        }
         document.getElementById('detail-view').style.display = 'none';
         document.getElementById('list-view').style.display = 'block';
         currentRecordId = null;
@@ -665,7 +704,6 @@
         const record = patientRecords.find(r => r.id === id);
         
         if (record) {
-            // テキストデータの復元
             const elements = document.querySelectorAll('.save-target');
             elements.forEach(el => {
                 if (record[el.id] !== undefined) {
@@ -677,7 +715,7 @@
                 }
             });
 
-            // ★署名画像の復元
+            // 署名画像の復元
             for (let key in canvases) {
                 const ctx = contexts[key];
                 ctx.clearRect(0, 0, canvases[key].width, canvases[key].height);
@@ -693,7 +731,7 @@
                 }
             }
             
-            // 写真の復元
+            // カード写真の復元
             if (record['card-image']) {
                 cardImageDataUrl = record['card-image'];
                 document.getElementById('card-image-preview').src = cardImageDataUrl;
@@ -746,14 +784,26 @@
         }
     }
 
-    // --- Excel出力処理 ---
     async function exportToExcel() {
         if (!currentRecordId) {
             alert("患者データが選択されていません。");
             return;
         }
         
-        saveTextData(); // テキストデータのみ保存（署名は保存ボタンで確定済みのものを使用）
+        // 1. まずテキストと写真を保存
+        saveTextData();
+
+        // 2. 現在キャンバスに描かれている署名を確実にキャプチャしてレコードに同期
+        for (let key in canvases) {
+            const liveSig = getSignatureDataUrl(canvases[key]);
+            const index = patientRecords.findIndex(r => r.id === currentRecordId);
+            if (index > -1) {
+                if (liveSig) {
+                    patientRecords[index][`sig-${key}`] = liveSig;
+                }
+            }
+        }
+        localStorage.setItem('pm-mri-records', JSON.stringify(patientRecords));
         
         const record = patientRecords.find(r => r.id === currentRecordId);
         if (!record) return;
@@ -771,12 +821,12 @@
         };
 
         const wb = new ExcelJS.Workbook();
-        const ws = wb.addWorksheet("Checklist");
+        const ws = wb.addWorksheet("MRIチェックリスト");
 
         ws.columns = [
             { width: 75 }, 
-            { width: 22 }, 
-            { width: 22 }  
+            { width: 24 }, 
+            { width: 24 }  
         ];
 
         let currentRow = 1;
@@ -784,8 +834,8 @@
         const addRow = (values, isHeader = false, isSubHeader = false) => {
             const row = ws.addRow(values);
             row.eachCell((cell, colNumber) => {
-                cell.font = { name: 'Meiryo', size: 11, bold: isHeader || isSubHeader };
-                cell.alignment = { vertical: 'middle', horizontal: isHeader ? 'center' : 'left', wrapText: true };
+                cell.font = { name: 'Meiryo', size: 10.5, bold: isHeader || isSubHeader };
+                cell.alignment = { vertical: 'middle', horizontal: isHeader ? 'center' : (colNumber === 1 ? 'left' : 'center'), wrapText: true };
                 
                 if (isSubHeader) {
                     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
@@ -801,8 +851,8 @@
         // タイトル
         const titleRow = addRow(["ボストン PMチェックリスト (MRI検査)", "", ""], true);
         ws.mergeCells(`A${currentRow - 1}:C${currentRow - 1}`);
-        titleRow.height = 30;
-        titleRow.getCell(1).font = { name: 'Meiryo', size: 16, bold: true };
+        titleRow.height = 32;
+        titleRow.getCell(1).font = { name: 'Meiryo', size: 15, bold: true, color: { argb: 'FF003366' } };
         addRow([]); 
 
         // 基本情報
@@ -816,27 +866,28 @@
         if (record['card-image']) {
             addRow([]);
             addRow(["■ MRI対応カード画像 (表面)", "", ""], false, true);
-            let cardRow = currentRow; 
-            ws.getRow(cardRow).height = 200; 
+            const cardRow = currentRow;
+            ws.addRow(["", "", ""]);
+            ws.getRow(cardRow).height = 180;
             
             try {
                 const base64Img = record['card-image'].split(',')[1];
                 const imageId = wb.addImage({ base64: base64Img, extension: 'jpeg' });
                 ws.addImage(imageId, {
-                    tl: { col: 0, row: cardRow - 1 }, 
-                    ext: { width: 350, height: 250 }
+                    tl: { col: 0.1, row: cardRow - 1 + 0.1 }, 
+                    ext: { width: 300, height: 220 }
                 });
             } catch(e) {
-                console.error("Image error", e);
+                console.error("Card image error", e);
             }
-            currentRow++; 
+            currentRow++;
             addRow([]);
         } else {
             addRow([]);
         }
 
         // ① オーダ前
-        addRow(["■ ① オーダ前（条件適応判断）", "", ""], false, true);
+        addRow(["■ ① オーダ前（条件適応判断）", "確認結果", ""], false, true);
         const tab1Items = [
             ["MRI対応デバイスの組み合わせ検索サイトで条件適応を確認した", 'chk1-0'],
             ["患者様より条件付きMRI対応カードの提示がある", 'chk1-1'],
@@ -858,14 +909,14 @@
         // ② MRI検査前
         addRow(["■ ② MRI検査前", "心房", "心室"], false, true);
         addRow(["Bipolar Pacingである", checkVal('chk2-1'), ""]);
-        addRow(["リードインピーダンス (200～2000 Ω)", getVal('pre-imp-a'), getVal('pre-imp-v')]);
+        addRow(["リードインピーダンス (200～2000 Ω)", getVal('pre-imp-a') ? getVal('pre-imp-a') + " Ω" : "", getVal('pre-imp-v') ? getVal('pre-imp-v') + " Ω" : ""]);
         addRow(["ペーシング閾値 (2.0 V / 0.4 ms以下)", getThVal('pre', 'a'), getThVal('pre', 'v')]);
-        addRow(["波高値 (横隔膜ツイッチング無)", getVal('pre-amp-a'), getVal('pre-amp-v')]);
-        addRow(["MRI撮像中モード指示 / レート", getVal('mri-mode'), getVal('mri-rate')]);
+        addRow(["波高値 (横隔膜ツイッチング無)", getVal('pre-amp-a') ? getVal('pre-amp-a') + " mV" : "", getVal('pre-amp-v') ? getVal('pre-amp-v') + " mV" : ""]);
+        addRow(["MRI撮像中モード指示 / レート", getVal('mri-mode'), getVal('mri-rate') ? getVal('mri-rate') + " ppm" : ""]);
         addRow([]);
 
         // ③ MRI検査時
-        addRow(["■ ③ MRI検査時", "", ""], false, true);
+        addRow(["■ ③ MRI検査時", "確認結果", ""], false, true);
         const tab3Items = [
             ["撮像は側臥位ではない", 'chk3-1'],
             ["一軸あたりの最大勾配スルーレートが 200 T/m/s 以下", 'chk3-2'],
@@ -875,17 +926,19 @@
         ];
         tab3Items.forEach(item => addRow([item[0], checkVal(item[1]), ""]));
         
-        // 放射線課 署名画像
-        addRow(["放射線課 署名", "", ""]);
-        let radRow = currentRow - 1;
-        ws.getRow(radRow).height = 65; 
-        if (record['sig-rad'] && record['sig-rad'].length > 100) {
+        // 放射線課 署名画像行
+        const radSigRow = addRow(["放射線課 署名（印）", "", ""]);
+        const radRowIdx = currentRow - 1;
+        ws.getRow(radRowIdx).height = 70;
+        
+        const radSigData = record['sig-rad'] || getSignatureDataUrl(canvases['rad']);
+        if (radSigData && radSigData.length > 50) {
             try {
-                const base64Img = record['sig-rad'].split(',')[1];
+                const base64Img = radSigData.split(',')[1];
                 const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
                 ws.addImage(imageId, {
-                    tl: { col: 1, row: radRow - 1 },
-                    ext: { width: 160, height: 60 }
+                    tl: { col: 1.1, row: radRowIdx - 1 + 0.08 },
+                    ext: { width: 170, height: 62 }
                 });
             } catch(e) {
                  console.error("Signature image error (rad)", e);
@@ -897,21 +950,23 @@
         addRow(["■ ④ MRI検査後", "心房", "心室"], false, true);
         addRow(["設定戻しの確認を行った", checkVal('chk4-1'), ""]);
         addRow(["前データとの変動が無い事を確認した", checkVal('chk4-2'), ""]);
-        addRow(["リードインピーダンス", getVal('post-imp-a'), getVal('post-imp-v')]);
+        addRow(["リードインピーダンス", getVal('post-imp-a') ? getVal('post-imp-a') + " Ω" : "", getVal('post-imp-v') ? getVal('post-imp-v') + " Ω" : ""]);
         addRow(["ペーシング閾値", getThVal('post', 'a'), getThVal('post', 'v')]);
-        addRow(["波高値", getVal('post-amp-a'), getVal('post-amp-v')]);
+        addRow(["波高値", getVal('post-amp-a') ? getVal('post-amp-a') + " mV" : "", getVal('post-amp-v') ? getVal('post-amp-v') + " mV" : ""]);
         
-        // 循環器内科 医師署名画像
-        addRow(["循環器内科 医師署名", "", ""]);
-        let docRow = currentRow - 1;
-        ws.getRow(docRow).height = 65;
-        if (record['sig-doc'] && record['sig-doc'].length > 100) {
+        // 循環器内科 医師署名画像行
+        const docSigRow = addRow(["循環器内科 医師署名（印）", "", ""]);
+        const docRowIdx = currentRow - 1;
+        ws.getRow(docRowIdx).height = 70;
+        
+        const docSigData = record['sig-doc'] || getSignatureDataUrl(canvases['doc']);
+        if (docSigData && docSigData.length > 50) {
             try {
-                const base64Img = record['sig-doc'].split(',')[1];
+                const base64Img = docSigData.split(',')[1];
                 const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
                 ws.addImage(imageId, {
-                    tl: { col: 1, row: docRow - 1 },
-                    ext: { width: 160, height: 60 }
+                    tl: { col: 1.1, row: docRowIdx - 1 + 0.08 },
+                    ext: { width: 170, height: 62 }
                 });
             } catch(e) {
                  console.error("Signature image error (doc)", e);
@@ -925,12 +980,10 @@
         saveAs(blob, fileName);
     }
 
-    // 初期化処理
     window.onload = function() {
         initCanvases();
         initCamera(); 
         
-        // テキスト入力の自動保存イベント（changeとinput）
         const elements = document.querySelectorAll('.save-target');
         elements.forEach(el => {
             el.addEventListener('change', saveTextData);
