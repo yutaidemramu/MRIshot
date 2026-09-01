@@ -300,6 +300,7 @@
     let patientRecords = []; 
     let currentRecordId = null; 
     let cardImageDataUrl = null; // カメラ画像の保持用
+    let isRestoringSignatures = false; // ★追加: 画像の復元中かを判定するフラグ
 
     // --- タブ切り替え処理 ---
     function openTab(evt, tabName) {
@@ -535,8 +536,16 @@
             }
         });
 
+        // 保存済みの既存データを取得（非同期ロード時の保護用）
+        const existingRecord = patientRecords.find(r => r.id === currentRecordId);
+
         for (let key in canvases) {
-            data[`sig-${key}`] = canvases[key].toDataURL();
+            // 画像復元中であれば、元の保存データをそのまま引き継いで消失を防ぐ
+            if (isRestoringSignatures && existingRecord && existingRecord[`sig-${key}`]) {
+                data[`sig-${key}`] = existingRecord[`sig-${key}`];
+            } else {
+                data[`sig-${key}`] = canvases[key].toDataURL();
+            }
         }
         
         // 写真データを含める
@@ -648,14 +657,27 @@
                 }
             });
 
+            // 署名画像の復元（非同期ロード中の上書き防止対応）
+            let loadedCount = 0;
+            let totalToLoad = 0;
+            isRestoringSignatures = true;
+
             for (let key in canvases) {
                 const ctx = contexts[key];
                 ctx.clearRect(0, 0, canvases[key].width, canvases[key].height);
                 if (record[`sig-${key}`]) {
+                    totalToLoad++;
                     const img = new Image();
-                    img.onload = function() { ctx.drawImage(img, 0, 0); };
+                    img.onload = function() { 
+                        ctx.drawImage(img, 0, 0); 
+                        loadedCount++;
+                        if (loadedCount === totalToLoad) isRestoringSignatures = false;
+                    };
                     img.src = record[`sig-${key}`];
                 }
+            }
+            if (totalToLoad === 0) {
+                isRestoringSignatures = false;
             }
             
             // 写真の復元
@@ -783,7 +805,7 @@
             let cardRow = currentRow; // 次の行に配置
             ws.getRow(cardRow).height = 200; // 行の高さを広げる
             
-            const base64Img = record['card-image'].replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+            const base64Img = record['card-image'].split(',')[1]; // ★確実なデータ抽出に変更
             const imageId = wb.addImage({ base64: base64Img, extension: 'jpeg' });
             
             ws.addImage(imageId, {
@@ -841,7 +863,7 @@
         let radRow = currentRow - 1;
         ws.getRow(radRow).height = 65; 
         if (record['sig-rad'] && record['sig-rad'].length > 100) {
-            const base64Img = record['sig-rad'].replace(/^data:image\/(png|jpg);base64,/, "");
+            const base64Img = record['sig-rad'].split(',')[1]; // ★確実なデータ抽出に変更
             const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
             ws.addImage(imageId, {
                 tl: { col: 1, row: radRow - 1 },
@@ -863,7 +885,7 @@
         let docRow = currentRow - 1;
         ws.getRow(docRow).height = 65;
         if (record['sig-doc'] && record['sig-doc'].length > 100) {
-            const base64Img = record['sig-doc'].replace(/^data:image\/(png|jpg);base64,/, "");
+            const base64Img = record['sig-doc'].split(',')[1]; // ★確実なデータ抽出に変更
             const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
             ws.addImage(imageId, {
                 tl: { col: 1, row: docRow - 1 },
