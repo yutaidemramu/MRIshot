@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ボストン PMチェックリスト (MRI検査)</title>
-    <!-- Excel出力用ライブラリ (ExcelJS & FileSaver) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- 既存のCSSとライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 10px; }
         .container { max-width: 920px; margin: 20px auto; background: #fff; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
@@ -41,7 +40,6 @@
         .measure-grid input[type="text"], .measure-grid input[type="number"] { padding: 7px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 14px; }
         .measure-grid > div.header-col { font-weight: bold; background: #e9ecef; padding: 8px; text-align: center; font-size: 14px; border-radius: 4px; }
         
-        /* Compound inputs & previous data display */
         .compound-input { display: flex; align-items: center; gap: 4px; }
         .compound-input input { width: 100%; min-width: 40px; padding: 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .prev-value { font-size: 12px; color: #dc3545; font-weight: bold; text-align: left; margin-bottom: 4px; display: block; }
@@ -82,9 +80,32 @@
         .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .btn-back { background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
         .btn-back:hover { background-color: #5a6268; }
-        .btn-excel { background-color: #198754; color: white; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-excel:hover { background-color: #146c43; }
+        .btn-pdf { background-color: #d32f2f; color: white; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-pdf:hover { background-color: #b71c1c; }
         .top-nav-right { display: flex; align-items: center; gap: 15px; }
+
+        /* Modal Styles */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { position: relative; background: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; display: flex; flex-direction: column; align-items: center; }
+        .modal-close { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; cursor: pointer; color: #333; line-height: 1; }
+        .modal-image { max-width: 100%; height: auto; object-fit: contain; }
+        .help-icon { display: inline-flex; justify-content: center; align-items: center; width: 20px; height: 20px; background-color: #17a2b8; color: white; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; margin-left: 8px; vertical-align: middle; }
+        .help-icon:hover { background-color: #138496; }
+
+        /* 印刷（PDF）用隠しレイアウトのスタイル */
+        #print-layout { display: none; padding: 40px; font-family: 'Meiryo', sans-serif; color: #000; background: #fff; width: 800px; box-sizing: border-box; }
+        .print-title { text-align: center; font-size: 22px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 30px; }
+        .print-section-title { font-size: 16px; font-weight: bold; background: #f0f0f0; padding: 6px 10px; margin: 20px 0 10px 0; border: 1px solid #ccc; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+        .print-table th, .print-table td { border: 1px solid #999; padding: 6px 8px; text-align: left; vertical-align: middle; }
+        .print-table th { background-color: #f9f9f9; width: 35%; font-weight: normal; }
+        .print-card-img { max-width: 300px; max-height: 200px; display: block; margin: 10px 0; border: 1px solid #ccc; }
+        .print-sig-img { max-width: 200px; max-height: 70px; display: block; }
+        .chk-mark { font-weight: bold; font-size: 16px; text-align: center; }
+        .sig-container { display: flex; gap: 20px; margin-top: 20px; justify-content: flex-end; }
+        .sig-box { border: 1px solid #999; padding: 10px; width: 220px; text-align: center; }
+        .sig-box-title { font-size: 12px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; margin-bottom: 5px; }
+        .page-break { page-break-before: always; }
     </style>
 </head>
 <body>
@@ -117,7 +138,7 @@
             <button class="btn-back" onclick="showListView()">← 一覧に戻る</button>
             <div class="top-nav-right">
                 <span id="current-record-info" style="font-weight: bold; color: #0056b3;"></span>
-                <button class="btn-excel" onclick="exportToExcel()">📊 Excel出力</button>
+                <button class="btn-pdf" onclick="exportToPDF()">📄 PDF出力</button>
             </div>
         </div>
         
@@ -211,7 +232,7 @@
             <h3 style="color:#0056b3; margin-top: 25px;">MRI撮像中モード指示</h3>
             <div class="patient-info" style="margin-bottom: 10px;">
                 <div>
-                    <label>モード</label>
+                    <label>モード <span class="help-icon" onclick="openModal('mriModeModal')">?</span></label>
                     <select id="mri-mode" class="save-target">
                         <option value="">選択してください</option>
                         <option value="DOO">DOO</option>
@@ -226,6 +247,17 @@
                 </div>
             </div>
             <p class="alert">※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。</p>
+
+            <!-- 施行CE 署名欄 -->
+            <div class="signature-area" style="margin-top: 30px;">
+                <label>施行CE 署名（印）</label>
+                <canvas id="sig-canvas-ce" width="420" height="160"></canvas>
+                <div class="sig-buttons">
+                    <button class="btn-sig-save" onclick="saveSignature('ce')">✓ 署名を確定・保存</button>
+                    <button class="btn-clear" onclick="clearSignature('ce')">書き直す</button>
+                    <span id="sig-status-ce" class="sig-status">✓ 保存済</span>
+                </div>
+            </div>
         </div>
 
         <!-- ③ MRI検査時 -->
@@ -312,11 +344,33 @@
     </div> <!-- /detail-view -->
 </div>
 
+<!-- モーダル (フローチャート画像表示用) -->
+<div id="mriModeModal" class="modal-overlay" onclick="closeModal(event, 'mriModeModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="closeModal(null, 'mriModeModal')">&times;</span>
+        <img src="mrichange.jpg" alt="MRIモード フローチャート" class="modal-image" onerror="this.onerror=null; this.src='https://placehold.co/600x800/eeeeee/999999?text=Image+Not+Found\n(mrichange.jpg)';">
+    </div>
+</div>
+
+<!-- PDF出力用の隠しレイアウト（A4縦を想定） -->
+<div id="print-layout">
+    <!-- 内容は exportToPDF() 実行時に動的に生成されます -->
+</div>
+
 <script>
-    // --- データ管理用の変数 ---
+    // --- データ管理 ---
     let patientRecords = []; 
     let currentRecordId = null; 
     let cardImageDataUrl = null; 
+
+    // --- モーダル制御 ---
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+    function closeModal(event, modalId) {
+        if(event && event.target !== event.currentTarget) return; // overlayクリック時のみ閉じる
+        document.getElementById(modalId).style.display = 'none';
+    }
 
     // --- タブ切り替え処理 ---
     function openTab(evt, tabName) {
@@ -419,6 +473,7 @@
     }
 
     const canvases = {
+        'ce': document.getElementById('sig-canvas-ce'),
         'rad': document.getElementById('sig-canvas-rad'),
         'doc': document.getElementById('sig-canvas-doc')
     };
@@ -510,14 +565,9 @@
         if(isDrawing) {
             isDrawing = false;
             currentContext = null;
-            // 一筆書き終えたら自動でサイン保存を実行
-            if (key) {
-                saveSignature(key, true);
-            }
         }
     }
 
-    // キャンバスに描画があるかを判定し、白背景を敷いてDataURLを生成する関数
     function getSignatureDataUrl(canvas) {
         if (!canvas) return null;
         const ctx = canvas.getContext('2d');
@@ -525,16 +575,14 @@
         const data = imgData.data;
         let hasDrawing = false;
         
-        // ピクセルをスキャンして透明でないピクセルがあるか確認
         for (let i = 0; i < data.length; i += 4) {
-            if (data[i + 3] > 20) { // アルファ値が20以上
+            if (data[i + 3] > 20) { 
                 hasDrawing = true;
                 break;
             }
         }
         if (!hasDrawing) return null;
 
-        // 白背景を敷いた新しいキャンバスを作成して画像化（エクセルでの非表示化バグを完全に防止）
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
@@ -545,7 +593,6 @@
         return tempCanvas.toDataURL('image/png');
     }
 
-    // 署名保存処理
     function saveSignature(type, isAuto = false) {
         if (!currentRecordId) return;
         
@@ -669,9 +716,6 @@
     function showListView() {
         if (currentRecordId) {
             saveTextData();
-            // サインも保存
-            saveSignature('rad', true);
-            saveSignature('doc', true);
         }
         document.getElementById('detail-view').style.display = 'none';
         document.getElementById('list-view').style.display = 'block';
@@ -715,7 +759,6 @@
                 }
             });
 
-            // 署名画像の復元
             for (let key in canvases) {
                 const ctx = contexts[key];
                 ctx.clearRect(0, 0, canvases[key].width, canvases[key].height);
@@ -731,7 +774,6 @@
                 }
             }
             
-            // カード写真の復元
             if (record['card-image']) {
                 cardImageDataUrl = record['card-image'];
                 document.getElementById('card-image-preview').src = cardImageDataUrl;
@@ -784,23 +826,22 @@
         }
     }
 
-    async function exportToExcel() {
+    // --- PDF生成・出力処理 ---
+    async function exportToPDF() {
         if (!currentRecordId) {
             alert("患者データが選択されていません。");
             return;
         }
         
-        // 1. まずテキストと写真を保存
+        // 1. データ保存
         saveTextData();
-
-        // 2. 現在キャンバスに描かれている署名を確実にキャプチャしてレコードに同期
+        
+        // 未保存のキャンバス描画があればレコードに同期する
         for (let key in canvases) {
             const liveSig = getSignatureDataUrl(canvases[key]);
             const index = patientRecords.findIndex(r => r.id === currentRecordId);
-            if (index > -1) {
-                if (liveSig) {
-                    patientRecords[index][`sig-${key}`] = liveSig;
-                }
+            if (index > -1 && liveSig && !patientRecords[index][`sig-${key}`]) {
+                patientRecords[index][`sig-${key}`] = liveSig;
             }
         }
         localStorage.setItem('pm-mri-records', JSON.stringify(patientRecords));
@@ -808,176 +849,125 @@
         const record = patientRecords.find(r => r.id === currentRecordId);
         if (!record) return;
 
-        const checkVal = (id) => record[id] ? "✓" : "";
+        const checkVal = (id) => record[id] ? "☑" : "□";
         const getVal = (id) => record[id] || "";
-        
         const getThVal = (prefix, type) => {
             const v = record[`${prefix}-th-${type}-v`];
             const ms = record[`${prefix}-th-${type}-ms`];
             if(v || ms) return `${v || '-'} V / ${ms || '-'} ms`;
-            const old = record[`${prefix}-th-${type}`];
-            if(old) return old;
             return "";
         };
 
-        const wb = new ExcelJS.Workbook();
-        const ws = wb.addWorksheet("MRIチェックリスト");
+        const layout = document.getElementById('print-layout');
+        
+        // 印刷用HTMLの構築 (ページブレイクを考慮)
+        let html = `
+            <div class="print-title">条件付きMRI対応ペースメーカ MRI検査チェックリスト</div>
+            
+            <table class="print-table">
+                <tr><th>患者ID</th><td>${getVal('patient-id')}</td><th>患者名</th><td>${getVal('patient-name')}</td></tr>
+                <tr><th>オーダー日</th><td>${getVal('order-date')}</td><th>検査実施日</th><td>${getVal('exam-date')}</td></tr>
+            </table>
+        `;
+        
+        if (record['card-image']) {
+            html += `
+                <div class="print-section-title">■ MRI対応カード</div>
+                <img src="${record['card-image']}" class="print-card-img">
+            `;
+        }
 
-        ws.columns = [
-            { width: 75 }, 
-            { width: 24 }, 
-            { width: 24 }  
-        ];
+        html += `
+            <div class="print-section-title">① オーダ前 (条件適応判断)</div>
+            <table class="print-table">
+                <tr><td class="chk-mark" width="40">${checkVal('chk1-0')}</td><td>検索サイトにアクセスして条件適応を確認した</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-1')}</td><td>患者様より条件付きMRI対応カードの提示がある</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-2')}</td><td>患者様より条件付きMRIペースメーカの手帳の提示がある</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-3')}</td><td>ペースメーカ植込み後6週間を超えている</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-4')}</td><td>ペースメーカは胸部植え込みである</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-5')}</td><td>本装置と併用可能なMRI対応機器以外の機器が植込まれていない</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-6')}</td><td>MRI対応していないリード及びリードアダプタが植え込まれていない</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-7')}</td><td>併用されているMRI対応リード以外の植え込み機器が無い</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-8')}</td><td>MRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-9')}</td><td>PMチェックにおいて条件を満たしていないと撮影できないことがあると伝える</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-10')}</td><td>条件クリアで第2MRIへ連絡しオーダ日時をレントゲン技師に伝える</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-11')}</td><td>カルテ、ペースメーカー装着日が記入されているか確認</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk1-12')}</td><td>MRIカード持っていない場合は電子カルテでX-pを確認し残存リードがないこと確認</td></tr>
+            </table>
 
-        let currentRow = 1;
+            <div class="print-section-title">② MRI検査前 (ペースメーカチェック)</div>
+            <table class="print-table">
+                <tr><td class="chk-mark" width="40">${checkVal('chk2-1')}</td><td colspan="2">Bipolar Pacingである</td></tr>
+                <tr><th>計測項目</th><th>心房</th><th>心室</th></tr>
+                <tr><td>リードインピーダンス</td><td>${getVal('pre-imp-a') ? getVal('pre-imp-a') + ' Ω' : ''}</td><td>${getVal('pre-imp-v') ? getVal('pre-imp-v') + ' Ω' : ''}</td></tr>
+                <tr><td>ペーシング閾値</td><td>${getThVal('pre', 'a')}</td><td>${getThVal('pre', 'v')}</td></tr>
+                <tr><td>波高値</td><td>${getVal('pre-amp-a') ? getVal('pre-amp-a') + ' mV' : ''}</td><td>${getVal('pre-amp-v') ? getVal('pre-amp-v') + ' mV' : ''}</td></tr>
+                <tr><td>MRI撮像中モード / レート</td><td colspan="2">${getVal('mri-mode')} / ${getVal('mri-rate') ? getVal('mri-rate') + ' ppm' : ''}</td></tr>
+            </table>
+            
+            <div class="sig-container">
+                <div class="sig-box">
+                    <div class="sig-box-title">施行CE 署名（印）</div>
+                    ${record['sig-ce'] ? `<img src="${record['sig-ce']}" class="print-sig-img">` : '<br><br>'}
+                </div>
+            </div>
 
-        const addRow = (values, isHeader = false, isSubHeader = false) => {
-            const row = ws.addRow(values);
-            row.eachCell((cell, colNumber) => {
-                cell.font = { name: 'Meiryo', size: 10.5, bold: isHeader || isSubHeader };
-                cell.alignment = { vertical: 'middle', horizontal: isHeader ? 'center' : (colNumber === 1 ? 'left' : 'center'), wrapText: true };
-                
-                if (isSubHeader) {
-                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
-                    cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                } else if (!isHeader && values[0] && values[0] !== "■ MRI対応カード画像 (表面)") {
-                    cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                }
-            });
-            currentRow++;
-            return row;
+            <!-- PDF出力時、ここで改ページを入れる -->
+            <div class="page-break"></div>
+
+            <div class="print-section-title">③ MRI検査時 (MRI撮影時チェック)</div>
+            <table class="print-table">
+                <tr><td class="chk-mark" width="40">${checkVal('chk3-1')}</td><td>撮像は側臥位ではない</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk3-2')}</td><td>一軸あたりの最大勾配スルーレートが 200 T/m/s 以下</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk3-3')}</td><td>全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk3-4')}</td><td>送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk3-5')}</td><td>患者動態モニタリングを行えている</td></tr>
+            </table>
+
+            <div class="sig-container">
+                <div class="sig-box">
+                    <div class="sig-box-title">放射線課 署名（印）</div>
+                    ${record['sig-rad'] ? `<img src="${record['sig-rad']}" class="print-sig-img">` : '<br><br>'}
+                </div>
+            </div>
+
+            <div class="print-section-title">④ MRI検査後 (設定戻しの確認)</div>
+            <table class="print-table">
+                <tr><td class="chk-mark" width="40">${checkVal('chk4-1')}</td><td colspan="2">設定戻しの確認を行った</td></tr>
+                <tr><td class="chk-mark">${checkVal('chk4-2')}</td><td colspan="2">前データとの変動が無い事を確認した</td></tr>
+                <tr><th>計測項目</th><th>心房</th><th>心室</th></tr>
+                <tr><td>リードインピーダンス</td><td>${getVal('post-imp-a') ? getVal('post-imp-a') + ' Ω' : ''}</td><td>${getVal('post-imp-v') ? getVal('post-imp-v') + ' Ω' : ''}</td></tr>
+                <tr><td>ペーシング閾値</td><td>${getThVal('post', 'a')}</td><td>${getThVal('post', 'v')}</td></tr>
+                <tr><td>波高値</td><td>${getVal('post-amp-a') ? getVal('post-amp-a') + ' mV' : ''}</td><td>${getVal('post-amp-v') ? getVal('post-amp-v') + ' mV' : ''}</td></tr>
+            </table>
+
+            <div class="sig-container">
+                <div class="sig-box">
+                    <div class="sig-box-title">循環器内科 医師署名（印）</div>
+                    ${record['sig-doc'] ? `<img src="${record['sig-doc']}" class="print-sig-img">` : '<br><br>'}
+                </div>
+            </div>
+        `;
+        
+        layout.innerHTML = html;
+        layout.style.display = 'block';
+
+        const opt = {
+            margin:       10,
+            filename:     `PM_Checklist_${getVal('patient-id') || 'unnamed'}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // タイトル
-        const titleRow = addRow(["ボストン PMチェックリスト (MRI検査)", "", ""], true);
-        ws.mergeCells(`A${currentRow - 1}:C${currentRow - 1}`);
-        titleRow.height = 32;
-        titleRow.getCell(1).font = { name: 'Meiryo', size: 15, bold: true, color: { argb: 'FF003366' } };
-        addRow([]); 
-
-        // 基本情報
-        addRow(["■ 基本情報", "", ""], false, true);
-        addRow(["患者ID", getVal('patient-id'), ""]);
-        addRow(["患者名", getVal('patient-name'), ""]);
-        addRow(["MRI検査オーダー日", getVal('order-date'), ""]);
-        addRow(["MRI検査実施日", getVal('exam-date'), ""]);
-        
-        // 写真画像
-        if (record['card-image']) {
-            addRow([]);
-            addRow(["■ MRI対応カード画像 (表面)", "", ""], false, true);
-            const cardRow = currentRow;
-            ws.addRow(["", "", ""]);
-            ws.getRow(cardRow).height = 180;
-            
-            try {
-                const base64Img = record['card-image'].split(',')[1];
-                const imageId = wb.addImage({ base64: base64Img, extension: 'jpeg' });
-                ws.addImage(imageId, {
-                    tl: { col: 0.1, row: cardRow - 1 + 0.1 }, 
-                    ext: { width: 300, height: 220 }
-                });
-            } catch(e) {
-                console.error("Card image error", e);
-            }
-            currentRow++;
-            addRow([]);
-        } else {
-            addRow([]);
+        try {
+            await html2pdf().set(opt).from(layout).save();
+        } catch (e) {
+            console.error("PDF generation failed:", e);
+            alert("PDFの生成に失敗しました。");
+        } finally {
+            layout.style.display = 'none';
         }
-
-        // ① オーダ前
-        addRow(["■ ① オーダ前（条件適応判断）", "確認結果", ""], false, true);
-        const tab1Items = [
-            ["MRI対応デバイスの組み合わせ検索サイトで条件適応を確認した", 'chk1-0'],
-            ["患者様より条件付きMRI対応カードの提示がある", 'chk1-1'],
-            ["患者様より条件付きMRIペースメーカの手帳の提示がある", 'chk1-2'],
-            ["ペースメーカ植込み後6週間を超えている", 'chk1-3'],
-            ["ペースメーカは胸部植え込みである", 'chk1-4'],
-            ["本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと", 'chk1-5'],
-            ["MRI対応していないリード及びリードアダプタが植え込まれていない", 'chk1-6'],
-            ["ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い", 'chk1-7'],
-            ["患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える。", 'chk1-8'],
-            ["MRI検査当日、ペースメーカチェックにおいて条件を満たしていないと撮影できないことがあると伝える。", 'chk1-9'],
-            ["条件がクリアしていれば第2MRI（1301）へ連絡しオーダ日時をレントゲン技師に伝える。", 'chk1-10'],
-            ["カルテ、Prof⇒インプラント⇒ペースメーカー装着日が記入されているか確認", 'chk1-11'],
-            ["MRIカード持っていない場合は電子カルテでX-pを確認し外されたリードが残存していないことを確認する", 'chk1-12']
-        ];
-        tab1Items.forEach(item => addRow([item[0], checkVal(item[1]), ""]));
-        addRow([]);
-
-        // ② MRI検査前
-        addRow(["■ ② MRI検査前", "心房", "心室"], false, true);
-        addRow(["Bipolar Pacingである", checkVal('chk2-1'), ""]);
-        addRow(["リードインピーダンス (200～2000 Ω)", getVal('pre-imp-a') ? getVal('pre-imp-a') + " Ω" : "", getVal('pre-imp-v') ? getVal('pre-imp-v') + " Ω" : ""]);
-        addRow(["ペーシング閾値 (2.0 V / 0.4 ms以下)", getThVal('pre', 'a'), getThVal('pre', 'v')]);
-        addRow(["波高値 (横隔膜ツイッチング無)", getVal('pre-amp-a') ? getVal('pre-amp-a') + " mV" : "", getVal('pre-amp-v') ? getVal('pre-amp-v') + " mV" : ""]);
-        addRow(["MRI撮像中モード指示 / レート", getVal('mri-mode'), getVal('mri-rate') ? getVal('mri-rate') + " ppm" : ""]);
-        addRow([]);
-
-        // ③ MRI検査時
-        addRow(["■ ③ MRI検査時", "確認結果", ""], false, true);
-        const tab3Items = [
-            ["撮像は側臥位ではない", 'chk3-1'],
-            ["一軸あたりの最大勾配スルーレートが 200 T/m/s 以下", 'chk3-2'],
-            ["全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満", 'chk3-3'],
-            ["送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと", 'chk3-4'],
-            ["患者動態モニタリングを行えている", 'chk3-5']
-        ];
-        tab3Items.forEach(item => addRow([item[0], checkVal(item[1]), ""]));
-        
-        // 放射線課 署名画像行
-        const radSigRow = addRow(["放射線課 署名（印）", "", ""]);
-        const radRowIdx = currentRow - 1;
-        ws.getRow(radRowIdx).height = 70;
-        
-        const radSigData = record['sig-rad'] || getSignatureDataUrl(canvases['rad']);
-        if (radSigData && radSigData.length > 50) {
-            try {
-                const base64Img = radSigData.split(',')[1];
-                const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
-                ws.addImage(imageId, {
-                    tl: { col: 1.1, row: radRowIdx - 1 + 0.08 },
-                    ext: { width: 170, height: 62 }
-                });
-            } catch(e) {
-                 console.error("Signature image error (rad)", e);
-            }
-        }
-        addRow([]);
-
-        // ④ MRI検査後
-        addRow(["■ ④ MRI検査後", "心房", "心室"], false, true);
-        addRow(["設定戻しの確認を行った", checkVal('chk4-1'), ""]);
-        addRow(["前データとの変動が無い事を確認した", checkVal('chk4-2'), ""]);
-        addRow(["リードインピーダンス", getVal('post-imp-a') ? getVal('post-imp-a') + " Ω" : "", getVal('post-imp-v') ? getVal('post-imp-v') + " Ω" : ""]);
-        addRow(["ペーシング閾値", getThVal('post', 'a'), getThVal('post', 'v')]);
-        addRow(["波高値", getVal('post-amp-a') ? getVal('post-amp-a') + " mV" : "", getVal('post-amp-v') ? getVal('post-amp-v') + " mV" : ""]);
-        
-        // 循環器内科 医師署名画像行
-        const docSigRow = addRow(["循環器内科 医師署名（印）", "", ""]);
-        const docRowIdx = currentRow - 1;
-        ws.getRow(docRowIdx).height = 70;
-        
-        const docSigData = record['sig-doc'] || getSignatureDataUrl(canvases['doc']);
-        if (docSigData && docSigData.length > 50) {
-            try {
-                const base64Img = docSigData.split(',')[1];
-                const imageId = wb.addImage({ base64: base64Img, extension: 'png' });
-                ws.addImage(imageId, {
-                    tl: { col: 1.1, row: docRowIdx - 1 + 0.08 },
-                    ext: { width: 170, height: 62 }
-                });
-            } catch(e) {
-                 console.error("Signature image error (doc)", e);
-            }
-        }
-
-        // ファイル書き出し
-        const buffer = await wb.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        const fileName = `PM_Checklist_${getVal('patient-id') || 'unnamed'}.xlsx`;
-        saveAs(blob, fileName);
     }
 
     window.onload = function() {
