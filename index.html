@@ -59,9 +59,9 @@
         .check-item input[type="checkbox"] { margin-top: 4px; margin-right: 12px; transform: scale(1.2); cursor: pointer; }
         .check-item label { cursor: pointer; width: 100%; font-size: 15px; }
         
-        .measure-grid { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr; gap: 8px; margin-top: 10px; align-items: center; }
+        .measure-grid { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr; gap: 8px; margin-top: 10px; align-items: center; }
         .measure-grid input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box;}
-        .measure-grid div.header { font-weight: bold; background: #e9ecef; padding: 8px; text-align: center; border-radius: 4px; }
+        .measure-grid div.header { font-weight: bold; background: #e9ecef; padding: 8px; text-align: center; border-radius: 4px; font-size: 14px;}
         .measure-grid label { font-size: 14px; font-weight: bold; display: flex; flex-direction: column; }
         .measure-grid label span.prev-val { font-size: 11px; color: #666; font-weight: normal; margin-top: 2px; }
         
@@ -188,7 +188,7 @@
 
         <!-- ================= タブ1: オーダ前 ================= -->
         <div id="tab1" class="tab-content active">
-            <h3>条件適応判断</h3>
+            <h3 id="tab1-title">条件適応判断</h3>
             <div class="check-item" style="background:#e3f2fd;">
                 <label style="color:#0056b3; font-weight:bold;">
                     <a href="https://cieds-mri.com/jadia/public/mri-combi_search/index" target="_blank" onclick="document.getElementById('chk1-0').checked = true; saveCurrentRecord();">
@@ -198,31 +198,25 @@
                 <input type="checkbox" id="chk1-0" class="save-target" style="margin-left:auto;">
             </div>
             
-            <div class="check-item"><input type="checkbox" id="chk1-1" class="save-target"><label for="chk1-1">患者様より条件付きMRI対応カードの提示がある</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-2" class="save-target"><label for="chk1-2">患者様より条件付きMRIペースメーカの手帳の提示がある</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-3" class="save-target"><label for="chk1-3">ペースメーカ植込み後6週間を超えている</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-4" class="save-target"><label for="chk1-4">ペースメーカは胸部植え込みである</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-5" class="save-target"><label for="chk1-5">本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-6" class="save-target"><label for="chk1-6">MRI対応していないリード及びリードアダプタが植え込まれていない</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-7" class="save-target"><label for="chk1-7">ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-8" class="save-target"><label for="chk1-8">患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える。</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-9" class="save-target"><label for="chk1-9">MRI検査当日、ペースメーカチェックにおいて条件を満たしていないと撮影できないことがあると伝える。</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-10" class="save-target"><label for="chk1-10">条件がクリアしていれば第2MRIへ連絡しオーダ日時をレントゲン技師に伝える。</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-11" class="save-target"><label for="chk1-11">カルテ等にペースメーカー装着日が記入されているか確認</label></div>
-            <div class="check-item"><input type="checkbox" id="chk1-12" class="save-target"><label for="chk1-12">MRIカード持っていない場合はX-p等を確認し外されたリードが残存していないことを確認する</label></div>
+            <div id="tab1-checklist">
+                <!-- 動的にチェックリストを生成 -->
+            </div>
         </div>
 
         <!-- ================= タブ2: MRI検査前 ================= -->
         <div id="tab2" class="tab-content">
-            <h3>ペースメーカチェック</h3>
-            <div class="check-item"><input type="checkbox" id="chk2-1" class="save-target"><label for="chk2-1">Bipolar Pacingである</label></div>
+            <h3 id="tab2-title">デバイスチェック</h3>
+            <div id="tab2-checklist">
+                <!-- 動的にチェックリストを生成 -->
+            </div>
             
-            <div class="measure-grid">
-                <div class="header">計測項目</div><div class="header">心房 (A)</div><div class="header">心室 (V)</div>
+            <div class="measure-grid" id="measure-grid-pre">
+                <div class="header">計測項目</div><div class="header">心房 (A)</div><div class="header">心室 (RV)</div><div class="header" id="header-lv">心室 (LV)</div>
                 
-                <label>リードインピーダンス<br><span style="font-weight:normal;font-size:12px;">(200～2000 Ω)</span></label>
+                <label>リードインピーダンス<br><span style="font-weight:normal;font-size:12px;">(200～3000 Ω)</span></label>
                 <div class="input-group"><input type="number" id="pre-imp-a" class="save-target"><span>Ω</span></div>
-                <div class="input-group"><input type="number" id="pre-imp-v" class="save-target"><span>Ω</span></div>
+                <div class="input-group"><input type="number" id="pre-imp-rv" class="save-target"><span>Ω</span></div>
+                <div class="input-group" id="input-pre-imp-lv"><input type="number" id="pre-imp-lv" class="save-target"><span>Ω</span></div>
                 
                 <label>ペーシング閾値<br><span style="font-weight:normal;font-size:12px;">(2.0 V / 0.4 ms以下)</span></label>
                 <div style="display:flex; gap:2px; flex-direction:column;">
@@ -230,13 +224,18 @@
                     <div class="input-group"><input type="number" step="0.1" id="pre-th-a-ms" class="save-target" placeholder="ms"><span>ms</span></div>
                 </div>
                 <div style="display:flex; gap:2px; flex-direction:column;">
-                    <div class="input-group"><input type="number" step="0.1" id="pre-th-v-v" class="save-target" placeholder="V"><span>V</span></div>
-                    <div class="input-group"><input type="number" step="0.1" id="pre-th-v-ms" class="save-target" placeholder="ms"><span>ms</span></div>
+                    <div class="input-group"><input type="number" step="0.1" id="pre-th-rv-v" class="save-target" placeholder="V"><span>V</span></div>
+                    <div class="input-group"><input type="number" step="0.1" id="pre-th-rv-ms" class="save-target" placeholder="ms"><span>ms</span></div>
+                </div>
+                <div style="display:flex; gap:2px; flex-direction:column;" id="input-pre-th-lv">
+                    <div class="input-group"><input type="number" step="0.1" id="pre-th-lv-v" class="save-target" placeholder="V"><span>V</span></div>
+                    <div class="input-group"><input type="number" step="0.1" id="pre-th-lv-ms" class="save-target" placeholder="ms"><span>ms</span></div>
                 </div>
                 
                 <label>波高値<br><span style="font-weight:normal;font-size:12px;">(横隔膜ツイッチング無)</span></label>
                 <div class="input-group"><input type="number" step="0.1" id="pre-amp-a" class="save-target"><span>mV</span></div>
-                <div class="input-group"><input type="number" step="0.1" id="pre-amp-v" class="save-target"><span>mV</span></div>
+                <div class="input-group"><input type="number" step="0.1" id="pre-amp-rv" class="save-target"><span>mV</span></div>
+                <div class="input-group" id="input-pre-amp-lv"><input type="number" step="0.1" id="pre-amp-lv" class="save-target"><span>mV</span></div>
             </div>
 
             <h3 style="margin-top: 20px;">MRI撮像中モード指示</h3>
@@ -249,6 +248,8 @@
                         <option value="VOO">VOO</option>
                         <option value="AOO">AOO</option>
                         <option value="ODO">ODO</option>
+                        <option value="OVO">OVO</option>
+                        <option value="OAO">OAO</option>
                     </select>
                 </div>
                 <div>
@@ -256,7 +257,7 @@
                     <div class="input-group"><input type="number" id="mri-rate" class="save-target"><span>ppm</span></div>
                 </div>
             </div>
-            <p class="alert">※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。</p>
+            <p class="alert" id="pre-alert-msg">※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。</p>
 
             <!-- CE署名欄 -->
             <div class="signature-area">
@@ -272,12 +273,10 @@
 
         <!-- ================= タブ3: MRI検査時 ================= -->
         <div id="tab3" class="tab-content">
-            <h3>MRI撮影時チェック</h3>
-            <div class="check-item"><input type="checkbox" id="chk3-1" class="save-target"><label for="chk3-1">撮像は側臥位ではない</label></div>
-            <div class="check-item"><input type="checkbox" id="chk3-2" class="save-target"><label for="chk3-2">一軸あたりの最大勾配スルーレートが 200 T/m/s 以下</label></div>
-            <div class="check-item"><input type="checkbox" id="chk3-3" class="save-target"><label for="chk3-3">全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満</label></div>
-            <div class="check-item"><input type="checkbox" id="chk3-4" class="save-target"><label for="chk3-4">送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと</label></div>
-            <div class="check-item"><input type="checkbox" id="chk3-5" class="save-target"><label for="chk3-5">患者動態モニタリングを行えている</label></div>
+            <h3 id="tab3-title">MRI撮影時チェック</h3>
+            <div id="tab3-checklist">
+                <!-- 動的にチェックリストを生成 -->
+            </div>
 
             <!-- 放射線課 署名欄 -->
             <div class="signature-area">
@@ -293,30 +292,37 @@
 
         <!-- ================= タブ4: MRI検査後 ================= -->
         <div id="tab4" class="tab-content">
-            <h3>設定戻しの確認</h3>
-            <div class="check-item"><input type="checkbox" id="chk4-1" class="save-target"><label for="chk4-1">設定戻しの確認を行った</label></div>
-            <div class="check-item"><input type="checkbox" id="chk4-2" class="save-target"><label for="chk4-2">前データとの変動が無い事を確認した</label></div>
+            <h3 id="tab4-title">設定戻しの確認</h3>
+            <div id="tab4-checklist">
+                 <!-- 動的にチェックリストを生成 -->
+            </div>
 
-            <div class="measure-grid">
-                <div class="header">計測項目</div><div class="header">心房 (A)</div><div class="header">心室 (V)</div>
+            <div class="measure-grid" id="measure-grid-post">
+                <div class="header">計測項目</div><div class="header">心房 (A)</div><div class="header">心室 (RV)</div><div class="header" id="header-lv-post">心室 (LV)</div>
                 
-                <label>リードインピーダンス<br><span class="prev-val" id="disp-pre-imp">前: -- / --</span></label>
+                <label>リードインピーダンス<br><span class="prev-val" id="disp-pre-imp">前: -- / -- / --</span></label>
                 <div class="input-group"><input type="number" id="post-imp-a" class="save-target"><span>Ω</span></div>
-                <div class="input-group"><input type="number" id="post-imp-v" class="save-target"><span>Ω</span></div>
+                <div class="input-group"><input type="number" id="post-imp-rv" class="save-target"><span>Ω</span></div>
+                <div class="input-group" id="input-post-imp-lv"><input type="number" id="post-imp-lv" class="save-target"><span>Ω</span></div>
                 
-                <label>ペーシング閾値<br><span class="prev-val" id="disp-pre-th">前: -- / --</span></label>
+                <label>ペーシング閾値<br><span class="prev-val" id="disp-pre-th">前: -- / -- / --</span></label>
                 <div style="display:flex; gap:2px; flex-direction:column;">
                     <div class="input-group"><input type="number" step="0.1" id="post-th-a-v" class="save-target" placeholder="V"><span>V</span></div>
                     <div class="input-group"><input type="number" step="0.1" id="post-th-a-ms" class="save-target" placeholder="ms"><span>ms</span></div>
                 </div>
                 <div style="display:flex; gap:2px; flex-direction:column;">
-                    <div class="input-group"><input type="number" step="0.1" id="post-th-v-v" class="save-target" placeholder="V"><span>V</span></div>
-                    <div class="input-group"><input type="number" step="0.1" id="post-th-v-ms" class="save-target" placeholder="ms"><span>ms</span></div>
+                    <div class="input-group"><input type="number" step="0.1" id="post-th-rv-v" class="save-target" placeholder="V"><span>V</span></div>
+                    <div class="input-group"><input type="number" step="0.1" id="post-th-rv-ms" class="save-target" placeholder="ms"><span>ms</span></div>
+                </div>
+                <div style="display:flex; gap:2px; flex-direction:column;" id="input-post-th-lv">
+                    <div class="input-group"><input type="number" step="0.1" id="post-th-lv-v" class="save-target" placeholder="V"><span>V</span></div>
+                    <div class="input-group"><input type="number" step="0.1" id="post-th-lv-ms" class="save-target" placeholder="ms"><span>ms</span></div>
                 </div>
                 
-                <label>波高値<br><span class="prev-val" id="disp-pre-amp">前: -- / --</span></label>
+                <label>波高値<br><span class="prev-val" id="disp-pre-amp">前: -- / -- / --</span></label>
                 <div class="input-group"><input type="number" step="0.1" id="post-amp-a" class="save-target"><span>mV</span></div>
-                <div class="input-group"><input type="number" step="0.1" id="post-amp-v" class="save-target"><span>mV</span></div>
+                <div class="input-group"><input type="number" step="0.1" id="post-amp-rv" class="save-target"><span>mV</span></div>
+                <div class="input-group" id="input-post-amp-lv"><input type="number" step="0.1" id="post-amp-lv" class="save-target"><span>mV</span></div>
             </div>
 
             <!-- 循環器内科 医師署名欄 -->
@@ -351,6 +357,72 @@
     let selectedMaker = "";
     let selectedDevice = "";
     const STORAGE_KEY = 'mri-checklist-db';
+
+    // --- チェックリスト定義 ---
+    const checklists = {
+        'default': {
+            'PM': {
+                tab1: [
+                    "患者様より条件付きMRI対応カードの提示がある",
+                    "患者様より条件付きMRIペースメーカの手帳の提示がある",
+                    "ペースメーカ植込み後6週間を超えている",
+                    "ペースメーカは胸部植え込みである",
+                    "本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと",
+                    "MRI対応していないリード及びリードアダプタが植え込まれていない",
+                    "ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い",
+                    "患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうよう伝える。",
+                    "MRI検査当日、ペースメーカチェックにおいて条件を満たしていないと撮影できないことがあると伝える。",
+                    "条件がクリアしていれば第2MRIへ連絡しオーダ日時をレントゲン技師に伝える。",
+                    "カルテ等にペースメーカー装着日が記入されているか確認",
+                    "MRIカード持っていない場合はX-p等を確認し外されたリードが残存していないことを確認する"
+                ],
+                tab2: [
+                    "Bipolar Pacingである"
+                ],
+                tab3: [
+                    "撮像は側臥位ではない",
+                    "一軸あたりの最大勾配スルーレートが 200 T/m/s 以下",
+                    "全身 SAR 2.0 W/kg以下、頭部SAR 3.2W/kg 未満",
+                    "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならないこと",
+                    "患者動態モニタリングを行えている"
+                ],
+                tab4: [
+                    "設定戻しの確認を行った",
+                    "前データとの変動が無い事を確認した"
+                ]
+            }
+        },
+        'メドトロニック': {
+             'ICD/CRT': {
+                tab1: [
+                    "患者様より条件付きMRI対応カードの提示がある",
+                    "患者様より条件付きMRI ICD,CRT手帳の提示がある",
+                    "植込み後6週間を超えている",
+                    "胸部植え込みである",
+                    "本装置と併用可能なMRI対応機器以外の機器が植込まれていないこと",
+                    "MRI対応していないリード及びリードアダプタが植え込まれていない",
+                    "本体と併用されているMRI対応リード以外の植え込み機器(以前使用していたリード等)が無い",
+                    "患者様にMRI検査日に手帳とカードを必ず持ってきてもらうよう伝える。",
+                    "MRI検査当日、チェックにおいて条件を満たしていないと撮影できないことがあると伝える。",
+                    "条件がクリアしていればMRI室へ連絡しオーダ日時をレントゲン技師に伝える。",
+                    "カルテ等にデバイス装着日が記入されているか確認",
+                    "MRIカード持っていない場合はX-p等を確認し外されたリードが残存していないことを確認する"
+                ],
+                tab2: [
+                    "Bipolar Pacingである"
+                ],
+                tab3: [
+                    "患者動態モニタリングを行えている" // Assuming this is standard even if not explicitly in the Excel for tab 3
+                ],
+                tab4: [
+                    "SureScan設定をOFFにし、元の設定に戻した",
+                    "前データとの変動が無い事を確認した",
+                    "電池残量、リードインピーダンス、ペーシング閾値、波高値などの再評価を実施した", // From 医師記載欄
+                    "アラート等の確認" // From 医師記載欄
+                ]
+            }
+        }
+    };
 
     // --- 画面切り替え ---
     function showScreen(screenId) {
@@ -392,10 +464,84 @@
         // タイトル更新
         document.getElementById('form-main-title').innerText = `${selectedMaker} ${selectedDevice} チェックリスト`;
         
+        // UIの構築 (チェックリストと測定項目)
+        buildDynamicUI();
+
         // 空のレコードを保存してフォーム画面へ
         saveCurrentRecord();
         showScreen('screen-form');
         openTab({currentTarget: document.querySelector('.tab')}, 'tab1');
+    }
+
+    // --- 動的UI生成 ---
+    function buildDynamicUI() {
+        // チェックリストの生成
+        let listData = checklists[selectedMaker]?.[selectedDevice];
+        if (!listData) {
+             listData = checklists['default']['PM']; // フォールバック
+        }
+
+        for (let i = 1; i <= 4; i++) {
+            const container = document.getElementById(`tab${i}-checklist`);
+            container.innerHTML = '';
+            const items = listData[`tab${i}`] || [];
+            
+            items.forEach((item, index) => {
+                const id = `chk${i}-${index + 1}`;
+                const div = document.createElement('div');
+                div.className = 'check-item';
+                div.innerHTML = `<input type="checkbox" id="${id}" class="save-target"><label for="${id}">${item}</label>`;
+                container.appendChild(div);
+            });
+        }
+
+        // 測定項目の表示制御 (LVの有無)
+        const isCRT = selectedDevice.includes('CRT');
+        const lvHeaders = document.querySelectorAll('#header-lv, #header-lv-post');
+        const lvInputsPre = [
+            document.getElementById('input-pre-imp-lv'),
+            document.getElementById('input-pre-th-lv'),
+            document.getElementById('input-pre-amp-lv')
+        ];
+        const lvInputsPost = [
+            document.getElementById('input-post-imp-lv'),
+            document.getElementById('input-post-th-lv'),
+            document.getElementById('input-post-amp-lv')
+        ];
+
+        if (isCRT) {
+            lvHeaders.forEach(el => el.style.display = 'block');
+            lvInputsPre.forEach(el => el.style.display = 'flex');
+            lvInputsPost.forEach(el => el.style.display = 'flex');
+            document.getElementById('measure-grid-pre').style.gridTemplateColumns = "2fr 1fr 1fr 1fr";
+            document.getElementById('measure-grid-post').style.gridTemplateColumns = "2fr 1fr 1fr 1fr";
+        } else {
+            lvHeaders.forEach(el => el.style.display = 'none');
+            lvInputsPre.forEach(el => el.style.display = 'none');
+            lvInputsPost.forEach(el => el.style.display = 'none');
+            document.getElementById('measure-grid-pre').style.gridTemplateColumns = "2fr 1.5fr 1.5fr";
+            document.getElementById('measure-grid-post').style.gridTemplateColumns = "2fr 1.5fr 1.5fr";
+        }
+
+        // 注意書きの変更
+        const alertMsg = document.getElementById('pre-alert-msg');
+        if (selectedMaker === 'メドトロニック' && selectedDevice === 'ICD/CRT') {
+            alertMsg.innerText = "※上記条件を満たしていない場合でもSureScanをONにできる場合があるため、プログラマの指示に従うこと。";
+        } else {
+            alertMsg.innerText = "※上記測定条件満たしていない者はMRI撮影ができません。満たせない場合は主治医に報告してください。";
+        }
+        
+        // 動的に生成した要素にもイベントリスナを再設定
+        document.querySelectorAll('.save-target').forEach(el => {
+            el.removeEventListener('change', saveCurrentRecord); // 念のため削除
+            el.addEventListener('change', saveCurrentRecord);
+        });
+
+        // 動的生成要素の入力イベントリスナ再設定
+        document.querySelectorAll('#pre-imp-a, #pre-imp-rv, #pre-imp-lv, #pre-th-a-v, #pre-th-a-ms, #pre-th-rv-v, #pre-th-rv-ms, #pre-th-lv-v, #pre-th-lv-ms, #pre-amp-a, #pre-amp-rv, #pre-amp-lv').forEach(el => {
+            el.removeEventListener('input', updatePrevValues);
+            el.addEventListener('input', updatePrevValues);
+        });
     }
 
     // --- 一覧描画 ---
@@ -470,6 +616,15 @@
         const record = db[id];
         if(!record) return;
 
+        selectedMaker = record.data['record-maker'] || '不明';
+        selectedDevice = record.data['record-device'] || '不明';
+        
+        // タイトル更新
+        document.getElementById('form-main-title').innerText = `${selectedMaker} ${selectedDevice} チェックリスト`;
+        
+        // UI再構築
+        buildDynamicUI();
+
         // データ反映
         document.querySelectorAll('.save-target').forEach(el => {
             if(record.data[el.id] !== undefined) {
@@ -477,11 +632,6 @@
                 else el.value = record.data[el.id];
             }
         });
-
-        // タイトル更新
-        const m = record.data['record-maker'] || '不明';
-        const d = record.data['record-device'] || '不明';
-        document.getElementById('form-main-title').innerText = `${m} ${d} チェックリスト`;
 
         // 画像の復元
         if(record.data['card-image']) {
@@ -567,24 +717,24 @@
     // --- 自動入力補助 (検査前→検査後) ---
     function updatePrevValues() {
         const pImpA = document.getElementById('pre-imp-a').value || '--';
-        const pImpV = document.getElementById('pre-imp-v').value || '--';
-        document.getElementById('disp-pre-imp').innerText = `前: ${pImpA} / ${pImpV}`;
+        const pImpRV = document.getElementById('pre-imp-rv').value || '--';
+        const pImpLV = document.getElementById('pre-imp-lv').value || '--';
+        document.getElementById('disp-pre-imp').innerText = `前: A(${pImpA}) / RV(${pImpRV}) / LV(${pImpLV})`;
 
         const pThAv = document.getElementById('pre-th-a-v').value || '--';
         const pThAms = document.getElementById('pre-th-a-ms').value || '--';
-        const pThVv = document.getElementById('pre-th-v-v').value || '--';
-        const pThVms = document.getElementById('pre-th-v-ms').value || '--';
-        document.getElementById('disp-pre-th').innerText = `前: A(${pThAv}V/${pThAms}ms) V(${pThVv}V/${pThVms}ms)`;
+        const pThRVv = document.getElementById('pre-th-rv-v').value || '--';
+        const pThRVms = document.getElementById('pre-th-rv-ms').value || '--';
+        const pThLVv = document.getElementById('pre-th-lv-v').value || '--';
+        const pThLVms = document.getElementById('pre-th-lv-ms').value || '--';
+        document.getElementById('disp-pre-th').innerText = `前: A(${pThAv}V/${pThAms}ms) RV(${pThRVv}V/${pThRVms}ms) LV(${pThLVv}V/${pThLVms}ms)`;
 
         const pAmpA = document.getElementById('pre-amp-a').value || '--';
-        const pAmpV = document.getElementById('pre-amp-v').value || '--';
-        document.getElementById('disp-pre-amp').innerText = `前: ${pAmpA} / ${pAmpV}`;
+        const pAmpRV = document.getElementById('pre-amp-rv').value || '--';
+        const pAmpLV = document.getElementById('pre-amp-lv').value || '--';
+        document.getElementById('disp-pre-amp').innerText = `前: A(${pAmpA}) / RV(${pAmpRV}) / LV(${pAmpLV})`;
     }
 
-    // 入力時に即時反映
-    document.querySelectorAll('#pre-imp-a, #pre-imp-v, #pre-th-a-v, #pre-th-a-ms, #pre-th-v-v, #pre-th-v-ms, #pre-amp-a, #pre-amp-v').forEach(el => {
-        el.addEventListener('input', updatePrevValues);
-    });
 
     // --- モーダル表示 ---
     const modal = document.getElementById("helpModal");
@@ -755,7 +905,7 @@
 
         // 列幅設定
         ws.columns = [
-            { width: 35 }, { width: 15 }, { width: 15 }
+            { width: 35 }, { width: 15 }, { width: 15 }, { width: 15 }
         ];
 
         let currentRow = 1;
@@ -766,7 +916,7 @@
             if (isHeader) {
                 row.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
                 row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0056B3' } };
-                ws.mergeCells(`A${currentRow}:C${currentRow}`);
+                ws.mergeCells(`A${currentRow}:D${currentRow}`);
                 row.alignment = { horizontal: 'center' };
             } else if (isSubHeader) {
                 row.font = { bold: true, size: 12 };
@@ -787,15 +937,15 @@
 
         const titleMaker = document.getElementById('record-maker').value;
         const titleDevice = document.getElementById('record-device').value;
+        const isCRT = titleDevice.includes('CRT');
         
         // --- 1. 基本情報 ---
         addRow([`${titleMaker} ${titleDevice} MRI検査チェックリスト`], true);
-        addRow(['基本情報', '', ''], false, true);
-        addRow(['患者ID', v('patient-id'), '']);
-        addRow(['患者名', v('patient-name'), '']);
-        addRow(['MRI検査オーダー日', v('order-date'), '']);
-        addRow(['MRI検査実施日', v('exam-date'), '']);
-        ws.mergeCells(`B3:C3`); ws.mergeCells(`B4:C4`); ws.mergeCells(`B5:C5`); ws.mergeCells(`B6:C6`);
+        addRow(['基本情報', '', '', ''], false, true);
+        addRow(['患者ID', v('patient-id'), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        addRow(['患者名', v('patient-name'), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        addRow(['MRI検査オーダー日', v('order-date'), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        addRow(['MRI検査実施日', v('exam-date'), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
         addRow(['']);
 
         // 画像処理共通関数
@@ -814,7 +964,7 @@
         const db = getDB();
         const cardImg = db[currentRecordId]?.data['card-image'];
         if(cardImg) {
-            addRow(['■ MRI対応カード画像', '', ''], false, true);
+            addRow(['■ MRI対応カード画像', '', '', ''], false, true);
             let imgRow = currentRow - 1;
             ws.getRow(imgRow).height = 150;
             attachImage(cardImg, 1, imgRow - 1, 200, 150);
@@ -822,30 +972,42 @@
         }
 
         // --- 3. オーダ前 ---
-        addRow(['① オーダ前確認', '', ''], true);
-        for(let i=1; i<=12; i++) {
-            const label = document.querySelector(`label[for="chk1-${i}"]`)?.innerText || '';
-            if(label) { addRow([label, v(`chk1-${i}`, true), '']); ws.mergeCells(`B${currentRow-1}:C${currentRow-1}`); }
-        }
+        addRow(['① オーダ前確認', '', '', ''], true);
+        const chk1Items = document.querySelectorAll('#tab1-checklist .check-item');
+        chk1Items.forEach((item, index) => {
+             const label = item.querySelector('label').innerText;
+             addRow([label, v(`chk1-${index+1}`, true), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        });
         addRow(['']);
 
         // --- 4. MRI検査前 ---
-        addRow(['② MRI検査前 (ペースメーカチェック)', '', ''], true);
-        addRow([document.querySelector(`label[for="chk2-1"]`)?.innerText || '', v('chk2-1', true), '']); ws.mergeCells(`B${currentRow-1}:C${currentRow-1}`);
+        addRow(['② MRI検査前 (デバイスチェック)', '', '', ''], true);
+        const chk2Items = document.querySelectorAll('#tab2-checklist .check-item');
+        chk2Items.forEach((item, index) => {
+             const label = item.querySelector('label').innerText;
+             addRow([label, v(`chk2-${index+1}`, true), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        });
         
-        addRow(['計測項目', '心房(A)', '心室(V)'], false, true);
-        addRow(['リードインピーダンス', v('pre-imp-a')+' Ω', v('pre-imp-v')+' Ω']);
-        addRow(['ペーシング閾値', v('pre-th-a-v')+' V / '+v('pre-th-a-ms')+' ms', v('pre-th-v-v')+' V / '+v('pre-th-v-ms')+' ms']);
-        addRow(['波高値', v('pre-amp-a')+' mV', v('pre-amp-v')+' mV']);
+        if (isCRT) {
+            addRow(['計測項目', '心房(A)', '心室(RV)', '心室(LV)'], false, true);
+            addRow(['リードインピーダンス', v('pre-imp-a')+' Ω', v('pre-imp-rv')+' Ω', v('pre-imp-lv')+' Ω']);
+            addRow(['ペーシング閾値', v('pre-th-a-v')+' V / '+v('pre-th-a-ms')+' ms', v('pre-th-rv-v')+' V / '+v('pre-th-rv-ms')+' ms', v('pre-th-lv-v')+' V / '+v('pre-th-lv-ms')+' ms']);
+            addRow(['波高値', v('pre-amp-a')+' mV', v('pre-amp-rv')+' mV', v('pre-amp-lv')+' mV']);
+        } else {
+            addRow(['計測項目', '心房(A)', '心室(RV)', ''], false, true); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+            addRow(['リードインピーダンス', v('pre-imp-a')+' Ω', v('pre-imp-rv')+' Ω', '']); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+            addRow(['ペーシング閾値', v('pre-th-a-v')+' V / '+v('pre-th-a-ms')+' ms', v('pre-th-rv-v')+' V / '+v('pre-th-rv-ms')+' ms', '']); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+            addRow(['波高値', v('pre-amp-a')+' mV', v('pre-amp-rv')+' mV', '']); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+        }
         
-        addRow(['MRI撮像中モード指示', '', ''], false, true);
-        addRow(['モード', v('mri-mode'), '']); ws.mergeCells(`B${currentRow-1}:C${currentRow-1}`);
-        addRow(['レート (ppm)', v('mri-rate'), '']); ws.mergeCells(`B${currentRow-1}:C${currentRow-1}`);
+        addRow(['MRI撮像中モード指示', '', '', ''], false, true);
+        addRow(['モード', v('mri-mode'), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        addRow(['レート (ppm)', v('mri-rate'), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
         
-        addRow(['施行CE 署名', '', '']);
+        addRow(['施行CE 署名', '', '', '']);
         let ceRow = currentRow - 1;
         ws.getRow(ceRow).height = 60;
-        ws.mergeCells(`B${ceRow}:C${ceRow}`);
+        ws.mergeCells(`B${ceRow}:D${ceRow}`);
         
         // 署名合成（保存されていない場合は現状のキャンバスから取得）
         const getSigDataUrl = (type) => {
@@ -865,32 +1027,45 @@
         addRow(['']);
 
         // --- 5. MRI検査時 ---
-        addRow(['③ MRI撮影時チェック', '', ''], true);
-        for(let i=1; i<=5; i++) {
-            const label = document.querySelector(`label[for="chk3-${i}"]`)?.innerText || '';
-            if(label) { addRow([label, v(`chk3-${i}`, true), '']); ws.mergeCells(`B${currentRow-1}:C${currentRow-1}`); }
-        }
-        addRow(['放射線課 署名', '', '']);
+        addRow(['③ MRI撮影時チェック', '', '', ''], true);
+        const chk3Items = document.querySelectorAll('#tab3-checklist .check-item');
+        chk3Items.forEach((item, index) => {
+             const label = item.querySelector('label').innerText;
+             addRow([label, v(`chk3-${index+1}`, true), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        });
+
+        addRow(['放射線課 署名', '', '', '']);
         let radRow = currentRow - 1;
         ws.getRow(radRow).height = 60;
-        ws.mergeCells(`B${radRow}:C${radRow}`);
+        ws.mergeCells(`B${radRow}:D${radRow}`);
         attachImage(getSigDataUrl('rad'), 1, radRow - 1, 160, 50);
         addRow(['']);
 
         // --- 6. MRI検査後 ---
-        addRow(['④ MRI検査後 (設定戻しの確認)', '', ''], true);
-        addRow([document.querySelector(`label[for="chk4-1"]`)?.innerText || '', v('chk4-1', true), '']); ws.mergeCells(`B${currentRow-1}:C${currentRow-1}`);
-        addRow([document.querySelector(`label[for="chk4-2"]`)?.innerText || '', v('chk4-2', true), '']); ws.mergeCells(`B${currentRow-1}:C${currentRow-1}`);
+        addRow(['④ MRI検査後 (設定戻しの確認)', '', '', ''], true);
+        const chk4Items = document.querySelectorAll('#tab4-checklist .check-item');
+        chk4Items.forEach((item, index) => {
+             const label = item.querySelector('label').innerText;
+             addRow([label, v(`chk4-${index+1}`, true), '', '']); ws.mergeCells(`B${currentRow-1}:D${currentRow-1}`);
+        });
+
         
-        addRow(['計測項目', '心房(A)', '心室(V)'], false, true);
-        addRow(['リードインピーダンス', v('post-imp-a')+' Ω', v('post-imp-v')+' Ω']);
-        addRow(['ペーシング閾値', v('post-th-a-v')+' V / '+v('post-th-a-ms')+' ms', v('post-th-v-v')+' V / '+v('post-th-v-ms')+' ms']);
-        addRow(['波高値', v('post-amp-a')+' mV', v('post-amp-v')+' mV']);
+        if (isCRT) {
+            addRow(['計測項目', '心房(A)', '心室(RV)', '心室(LV)'], false, true);
+            addRow(['リードインピーダンス', v('post-imp-a')+' Ω', v('post-imp-rv')+' Ω', v('post-imp-lv')+' Ω']);
+            addRow(['ペーシング閾値', v('post-th-a-v')+' V / '+v('post-th-a-ms')+' ms', v('post-th-rv-v')+' V / '+v('post-th-rv-ms')+' ms', v('post-th-lv-v')+' V / '+v('post-th-lv-ms')+' ms']);
+            addRow(['波高値', v('post-amp-a')+' mV', v('post-amp-rv')+' mV', v('post-amp-lv')+' mV']);
+        } else {
+            addRow(['計測項目', '心房(A)', '心室(RV)', ''], false, true); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+            addRow(['リードインピーダンス', v('post-imp-a')+' Ω', v('post-imp-rv')+' Ω', '']); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+            addRow(['ペーシング閾値', v('post-th-a-v')+' V / '+v('post-th-a-ms')+' ms', v('post-th-rv-v')+' V / '+v('post-th-rv-ms')+' ms', '']); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+            addRow(['波高値', v('post-amp-a')+' mV', v('post-amp-rv')+' mV', '']); ws.mergeCells(`C${currentRow-1}:D${currentRow-1}`);
+        }
         
-        addRow(['循環器内科 医師署名', '', '']);
+        addRow(['循環器内科 医師署名', '', '', '']);
         let docRow = currentRow - 1;
         ws.getRow(docRow).height = 60;
-        ws.mergeCells(`B${docRow}:C${docRow}`);
+        ws.mergeCells(`B${docRow}:D${docRow}`);
         attachImage(getSigDataUrl('doc'), 1, docRow - 1, 160, 50);
 
         // ファイル保存
@@ -904,8 +1079,8 @@
     window.onload = function() {
         initCanvases();
         
-        // 入力イベントリスナーの追加
-        document.querySelectorAll('.save-target').forEach(el => {
+        // 入力イベントリスナーの追加 (静的要素のみ。動的要素はbuildDynamicUIで設定)
+        document.querySelectorAll('.save-target:not([id^="chk"])').forEach(el => {
             el.addEventListener('change', saveCurrentRecord);
         });
         
