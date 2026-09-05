@@ -725,7 +725,6 @@
         window.scrollTo(0,0);
     }
 
-    // --- PATIENT LIST LOGIC ---
     function showPatientList() {
         const tbody = document.getElementById('patient-list-body');
         const noDataMsg = document.getElementById('no-data-msg');
@@ -795,7 +794,6 @@
         currentMfg = mfg;
         currentDevice = device;
         
-        // ヘッダータイトルの設定などを selectManufacturer / selectDevice の代わりに行う
         let mfgTitle = configData[mfg]['PM'] ? configData[mfg]['PM'].title.split(' ')[0] : mfg;
         if(mfg === 'Boston') mfgTitle = 'Boston Scientific';
         if(mfg === 'NihonKohden') mfgTitle = 'Nihon Kohden';
@@ -808,13 +806,11 @@
         renderMeasurementTables(conf);
         setupSignatures();
         
-        // 読み込む前に一度フォームをリセットする
         resetForm();
 
-        // IDをセットしてからロードを呼ぶ
         document.getElementById('patient-id').value = id;
         
-        // JADIAリンク用ID付与（自動保存用）
+        // JADIAリンク用ID付与
         let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
         if(jadiaCb) jadiaCb.id = 'check-jadia';
         
@@ -832,10 +828,9 @@
             localStorage.removeItem(`${key}_sig-ce`);
             localStorage.removeItem(`${key}_sig-rad`);
             localStorage.removeItem(`${key}_sig-doc`);
-            showPatientList(); // 一覧を再描画
+            showPatientList(); 
         }
     }
-    // --- END PATIENT LIST LOGIC ---
 
     function selectManufacturer(mfg) {
         currentMfg = mfg;
@@ -865,19 +860,30 @@
         renderMeasurementTables(conf);
         setupSignatures();
         
-        // JADIAリンク用ID付与（自動保存用）
+        // JADIAリンク用ID付与
         let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
         if(jadiaCb) jadiaCb.id = 'check-jadia';
         
-        // --- 新規作成時はフォームの入力をクリアする ---
         resetForm();
 
         showScreen('screen-checklist');
         
-        // 最初のタブを表示
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
+        // 最初のタブを表示する (バグ修正箇所)
+        const firstTab = document.querySelector('.main-tab');
+        if(firstTab) {
+            switchTab(firstTab, 'tab1');
+        }
+    }
+
+    function switchTab(element, tabId) {
+        document.querySelectorAll('.main-tab').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        
+        element.classList.add('active');
+        const targetContent = document.getElementById(tabId);
+        if(targetContent) {
+            targetContent.classList.add('active');
+        }
     }
 
     function switchActionTab(actionId) {
@@ -899,7 +905,6 @@
             listDiv.innerHTML = '';
             conf.tabs['tab'+i].forEach((text, idx) => {
                 const idStr = `check-t${i}-${idx}`;
-                // labelタグを使って、テキスト領域のどこを押してもチェックが入るようにする
                 listDiv.innerHTML += `
                     <label class="check-item" for="${idStr}">
                         <input type="checkbox" id="${idStr}" onchange="autoSave()">
@@ -937,7 +942,7 @@
 
     function autoSave() {
         const patientId = document.getElementById('patient-id').value.trim();
-        if (!patientId) return; // IDがない時は自動保存しない
+        if (!patientId) return; 
         
         const conf = configData[currentMfg][currentDevice];
         conf.measureRows.forEach(row => {
@@ -978,7 +983,7 @@
         const id = document.getElementById('patient-id').value.trim();
         if (!id) return;
         
-        // JADIA ID再付与（念のため）
+        // JADIA ID再付与
         let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
         if(jadiaCb) jadiaCb.id = 'check-jadia';
         
@@ -1019,8 +1024,7 @@
             });
             autoSave();
         } else {
-            // 新規IDの場合は現在の入力をそのまま保存する（クリアしない）
-            autoSave();
+            autoSave(); // 新規の場合は現在の状態をそのまま保存
         }
     }
 
@@ -1075,7 +1079,6 @@
     function setupSignatures() {
         ['sig-ce', 'sig-rad', 'sig-doc'].forEach(sid => {
             let cvs = document.getElementById(sid);
-            // キャンバスの論理サイズを固定（CSSで縮小表示されても座標ズレを防ぐため）
             cvs.width = 400; cvs.height = 120;
             let ctx = cvs.getContext('2d');
             ctx.lineWidth = 3; ctx.strokeStyle = 'black';
@@ -1086,7 +1089,6 @@
                 let rect = cvs.getBoundingClientRect();
                 let clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                // 表示サイズと論理サイズの比率を計算して座標を補正
                 let scaleX = cvs.width / rect.width;
                 let scaleY = cvs.height / rect.height;
                 return { 
@@ -1100,7 +1102,6 @@
                 let pos = getPos(e);
                 ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
                 
-                // ペンを入れたら保存ボタンを元に戻す
                 let btn = document.getElementById(`btn-save-${sid}`);
                 if(btn) { btn.innerHTML = "💾 保存"; btn.style.background = "#e8f5e9"; btn.style.color = "var(--success)"; }
             };
@@ -1195,7 +1196,6 @@
 
         const attachSig = (sid, title) => {
             let sigData = localStorage.getItem(`${getSaveKey()}_${sid}`);
-            // 保存されていなくても描画されていれば拾う
             if(!sigData) {
                 let cvs = document.getElementById(sid);
                 let bg = document.createElement('canvas');
@@ -1206,7 +1206,7 @@
                 sigData = bg.toDataURL('image/jpeg', 1.0);
             }
             
-            if(sigData && sigData.length > 1500) { // 空白キャンバス（容量小）を除外
+            if(sigData && sigData.length > 1500) { 
                 let b64 = sigData.split(',')[1];
                 let imgId = wb.addImage({ base64: b64, extension: 'jpeg' });
                 addRow([title], true);
