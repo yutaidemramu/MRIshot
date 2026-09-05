@@ -136,6 +136,13 @@
         }
         .help-icon:hover { background: #b3e5fc; }
         
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold; font-size: 0.85em; margin-bottom: 4px; }
+        .badge-mfg-boston { background-color: #1976d2; }
+        .badge-mfg-biotronik { background-color: #d32f2f; }
+        .badge-mfg-medtronic { background-color: #388e3c; }
+        .badge-mfg-nihonkohden { background-color: #f57c00; }
+        .badge-device { background-color: #607d8b; color: white; }
+        
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         #modal img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); object-fit: contain; }
         
@@ -155,22 +162,73 @@
 <div class="container">
     <!-- HOME SCREEN -->
     <div id="screen-home" class="screen active">
-        <h1>メーカーを選択してください</h1>
+        <h1 style="margin-bottom: 40px; font-size: 2em; color: var(--text-main);">MRIデバイス<br>統合チェックリスト</h1>
+        
+        <div style="display: flex; flex-direction: column; gap: 20px; max-width: 500px; margin: 0 auto; align-items: center;">
+            <button class="btn btn-primary" style="padding: 20px; font-size: 1.3em; width: 100%; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 5px;" onclick="showScreen('screen-mfg')">
+                <span>✨ 新規チェックリスト作成</span>
+                <span style="font-size: 0.65em; font-weight: normal; opacity: 0.9;">新しい患者の検査を開始する</span>
+            </button>
+            
+            <button class="btn btn-back" style="padding: 20px; font-size: 1.2em; width: 100%; border-radius: 12px; border: 2px solid var(--primary); background: white; color: var(--primary); display: flex; flex-direction: column; align-items: center; gap: 5px;" onclick="showPatientList()">
+                <span>🗂️ 保存データ一覧から再開</span>
+                <span style="font-size: 0.65em; font-weight: normal; opacity: 0.9;">一時保存したデータを読込・出力する</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MANUFACTURER SCREEN (NEW) -->
+    <div id="screen-mfg" class="screen">
+        <div class="top-bar">
+            <button class="btn btn-back" onclick="showScreen('screen-home')">← ホームに戻る</button>
+            <h2 style="margin:0; font-size: 1.2em; text-align: center; flex-grow: 1;">メーカー選択</h2>
+            <div style="width: 80px;"></div>
+        </div>
+        <h1>新規作成: メーカーを選択してください</h1>
         <div class="home-grid">
             <button class="btn-card" onclick="selectManufacturer('Boston')">Boston Scientific<br><span style="font-size:0.8em; font-weight:normal;">(ボストン)</span></button>
             <button class="btn-card" onclick="selectManufacturer('Biotronik')">Biotronik<br><span style="font-size:0.8em; font-weight:normal;">(バイオトロニック)</span></button>
             <button class="btn-card" onclick="selectManufacturer('Medtronic')">Medtronic<br><span style="font-size:0.8em; font-weight:normal;">(メドトロニック)</span></button>
             <button class="btn-card" onclick="selectManufacturer('NihonKohden')">Nihon Kohden<br><span style="font-size:0.8em; font-weight:normal;">(日本光電)</span></button>
         </div>
-        <div style="margin-top: 40px; text-align: center;">
-            <button class="btn btn-back" style="width: 100%; max-width: 300px; padding: 15px;" onclick="alert('全患者リスト画面は準備中です')">🗂️ 全患者の保存データを確認</button>
+    </div>
+
+    <!-- PATIENT LIST SCREEN (NEW) -->
+    <div id="screen-patient-list" class="screen">
+        <div class="top-bar">
+            <button class="btn btn-back" onclick="showScreen('screen-home')">← ホームに戻る</button>
+            <h2 style="margin:0; font-size: 1.2em; text-align: center; flex-grow: 1;">保存データ一覧</h2>
+            <div style="width: 80px;"></div>
+        </div>
+        
+        <div class="card-section">
+            <p class="action-desc" style="margin-bottom: 20px;">この端末（ブラウザ）に一時保存されているデータの一覧です。<br>「読込」を押すとチェックリスト画面を開き、続きから再開できます。</p>
+            <div style="overflow-x: auto;">
+                <table class="measure-table" id="patient-list-table">
+                    <thead>
+                        <tr>
+                            <th>患者ID</th>
+                            <th>氏名</th>
+                            <th>メーカー / デバイス</th>
+                            <th>登録日 (実施日)</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patient-list-body">
+                        <!-- JSで動的生成 -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-data-msg" style="display: none; text-align: center; padding: 30px; color: var(--text-light);">
+                保存されているデータはありません。
+            </div>
         </div>
     </div>
 
     <!-- DEVICE SCREEN -->
     <div id="screen-device" class="screen">
         <div class="top-bar">
-            <button class="btn btn-back" onclick="showScreen('screen-home')">← 戻る</button>
+            <button class="btn btn-back" onclick="showScreen('screen-mfg')">← 戻る</button>
             <h2 id="selected-mfg-title" style="margin:0;"></h2>
             <div style="width: 80px;"></div> <!-- Spacer for centering -->
         </div>
@@ -633,11 +691,151 @@
     let isDrawing = false;
     let cardImageBase64 = "";
 
+    function resetForm() {
+        document.getElementById('patient-id').value = '';
+        document.getElementById('patient-name').value = '';
+        document.getElementById('exam-order-date').value = '';
+        document.getElementById('exam-exec-date').value = '';
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.measure-input').forEach(inp => {
+            inp.value = '';
+            let dispId = inp.id.replace('pre-', 'disp-pre-');
+            let disp = document.getElementById(dispId);
+            if (disp) disp.innerText = '-';
+        });
+        
+        cardImageBase64 = "";
+        document.getElementById('card-image-preview').style.display = 'none';
+        document.getElementById('card-image-input').value = "";
+        
+        ['sig-ce', 'sig-rad', 'sig-doc'].forEach(sid => {
+            let cvs = document.getElementById(sid);
+            if (cvs) {
+                let ctx = cvs.getContext('2d');
+                ctx.clearRect(0, 0, cvs.width, cvs.height);
+            }
+            let btn = document.getElementById(`btn-save-${sid}`);
+            if(btn) { btn.innerHTML = "💾 保存"; btn.style.background = "#e8f5e9"; btn.style.color = "var(--success)"; }
+        });
+    }
+
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         window.scrollTo(0,0);
     }
+
+    // --- PATIENT LIST LOGIC ---
+    function showPatientList() {
+        const tbody = document.getElementById('patient-list-body');
+        const noDataMsg = document.getElementById('no-data-msg');
+        const table = document.getElementById('patient-list-table');
+        tbody.innerHTML = '';
+        
+        let hasData = false;
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            // シグネチャのデータ(_sig-)などはスキップし、メインのデータキーのみ処理
+            if (key.startsWith('mriData_') && !key.includes('_sig-')) {
+                hasData = true;
+                const dataStr = localStorage.getItem(key);
+                if (!dataStr) continue;
+                
+                try {
+                    const data = JSON.parse(dataStr);
+                    // キーの構造: mriData_Mfg_Device_ID
+                    const parts = key.split('_');
+                    if(parts.length >= 4) {
+                        const mfg = parts[1];
+                        const device = parts[2] === 'ICD' ? 'ICD_CRT' : parts[2]; // 古いデータ互換用かも知れないが、基本はパーツ通り
+                        const mfgDisplay = mfg === 'NihonKohden' ? '日本光電' : mfg;
+                        
+                        let badgeClass = 'badge-mfg-boston';
+                        if(mfg === 'Biotronik') badgeClass = 'badge-mfg-biotronik';
+                        else if(mfg === 'Medtronic') badgeClass = 'badge-mfg-medtronic';
+                        else if(mfg === 'NihonKohden') badgeClass = 'badge-mfg-nihonkohden';
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td style="font-weight:bold; font-size:1.1em;">${parts.slice(3).join('_')}</td>
+                            <td style="font-size:1.1em;">${data.name || '-'}</td>
+                            <td>
+                                <span class="badge ${badgeClass}">${mfgDisplay}</span><br>
+                                <span class="badge badge-device">${device === 'ICD_CRT' ? 'ICD / CRT-D' : 'PM (ペースメーカ)'}</span>
+                            </td>
+                            <td>${data.execDate || '-'}</td>
+                            <td>
+                                <div style="display:flex; gap:5px; justify-content:center;">
+                                    <button class="btn btn-save" style="padding: 6px 12px; font-size:0.9em;" onclick="loadFromList('${mfg}', '${device}', '${parts.slice(3).join('_')}')">📂 読込</button>
+                                    <button class="btn btn-clear" style="padding: 6px 12px; font-size:0.9em;" onclick="deleteFromList('${key}')">🗑️</button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+                } catch(e) {
+                    console.error("Failed to parse data for key", key, e);
+                }
+            }
+        }
+
+        if (hasData) {
+            table.style.display = 'table';
+            noDataMsg.style.display = 'none';
+        } else {
+            table.style.display = 'none';
+            noDataMsg.style.display = 'block';
+        }
+
+        showScreen('screen-patient-list');
+    }
+
+    function loadFromList(mfg, device, id) {
+        currentMfg = mfg;
+        currentDevice = device;
+        
+        // ヘッダータイトルの設定などを selectManufacturer / selectDevice の代わりに行う
+        let mfgTitle = configData[mfg]['PM'] ? configData[mfg]['PM'].title.split(' ')[0] : mfg;
+        if(mfg === 'Boston') mfgTitle = 'Boston Scientific';
+        if(mfg === 'NihonKohden') mfgTitle = 'Nihon Kohden';
+        document.getElementById('selected-mfg-title').innerText = mfgTitle;
+        
+        const conf = configData[currentMfg][currentDevice];
+        document.getElementById('checklist-title').innerText = conf.title;
+        
+        renderChecklists(conf);
+        renderMeasurementTables(conf);
+        setupSignatures();
+        
+        // 読み込む前に一度フォームをリセットする
+        resetForm();
+
+        // IDをセットしてからロードを呼ぶ
+        document.getElementById('patient-id').value = id;
+        
+        // JADIAリンク用ID付与（自動保存用）
+        let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
+        if(jadiaCb) jadiaCb.id = 'check-jadia';
+        
+        loadPatientData();
+        showScreen('screen-checklist');
+        
+        // 最初のタブを表示
+        const firstTab = document.querySelector('.main-tab');
+        if(firstTab) switchTab(firstTab, 'tab1');
+    }
+
+    function deleteFromList(key) {
+        if(confirm('この患者データを端末から削除しますか？\n（関連する手書き署名データも削除されます）')) {
+            localStorage.removeItem(key);
+            localStorage.removeItem(`${key}_sig-ce`);
+            localStorage.removeItem(`${key}_sig-rad`);
+            localStorage.removeItem(`${key}_sig-doc`);
+            showPatientList(); // 一覧を再描画
+        }
+    }
+    // --- END PATIENT LIST LOGIC ---
 
     function selectManufacturer(mfg) {
         currentMfg = mfg;
@@ -666,17 +864,17 @@
         renderChecklists(conf);
         renderMeasurementTables(conf);
         setupSignatures();
-        showScreen('screen-checklist');
         
         // JADIAリンク用ID付与（自動保存用）
         let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
         if(jadiaCb) jadiaCb.id = 'check-jadia';
         
-        loadPatientData();
-    }
+        // --- 新規作成時はフォームの入力をクリアする ---
+        resetForm();
 
-    function switchTab(el, tabId) {
-        document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+        showScreen('screen-checklist');
+        
+        // 最初のタブを表示
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
         document.getElementById(tabId).classList.add('active');
