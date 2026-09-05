@@ -8,91 +8,187 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         :root {
-            --primary: #0056b3;
-            --secondary: #f4f7f6;
-            --border: #ccc;
+            --primary: #2563eb;       /* モダンで信頼感のあるブルー */
+            --primary-hover: #1d4ed8;
+            --secondary: #f4f7f6;     /* 疲れないソフトな背景色 */
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+        
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--secondary);
-            margin: 0; padding: 20px; color: #333;
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-main);
+            line-height: 1.6;
         }
+
         .container {
-            max-width: 900px; margin: auto; background: white;
-            padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 960px; 
+            margin: auto; 
+            background: var(--surface);
+            padding: 30px; 
+            border-radius: var(--radius); 
+            box-shadow: var(--shadow);
         }
-        h1, h2 { text-align: center; color: var(--primary); }
+
+        h1 { text-align: center; color: var(--text-main); font-size: 1.8em; margin-bottom: 10px; font-weight: 700; }
+        h2 { text-align: center; color: var(--primary); font-size: 1.4em; font-weight: 600; margin: 0; }
         
-        .screen { display: none; }
+        .screen { display: none; animation: fadeIn 0.3s ease; }
         .screen.active { display: block; }
-        
-        /* ホーム画面スタイル */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .home-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px; margin-top: 20px;
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px; 
+            margin-top: 30px;
         }
+        
         .btn-card {
-            background: #fff; border: 2px solid var(--primary); color: var(--primary);
-            padding: 20px; text-align: center; border-radius: 8px; font-weight: bold;
-            font-size: 1.2em; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background: var(--surface); 
+            border: 2px solid var(--border); 
+            color: var(--text-main);
+            padding: 25px 20px; 
+            text-align: center; 
+            border-radius: var(--radius); 
+            font-weight: 600;
+            font-size: 1.2em; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .btn-card:hover { background: var(--primary); color: white; }
-        .btn-card.disabled { background: #eee; border-color: #aaa; color: #aaa; cursor: not-allowed; box-shadow: none; }
+        .btn-card:hover:not(.disabled) { 
+            background: #f8fafc;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        .btn-card.disabled { 
+            background: #f1f5f9; border-color: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; 
+        }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        .btn-back { 
+            background: var(--surface); color: var(--text-sub); border: 1px solid var(--border); 
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;
+        }
+        .btn-back:hover { background: #f8fafc; color: var(--text-main); }
         
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1em; }
-        
-        /* タブメニュー */
-        .tabs { display: flex; flex-wrap: wrap; border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
+        .btn-action { 
+            background: var(--primary); color: white; border: none; padding: 14px 24px; 
+            font-size: 1.1em; border-radius: var(--radius); font-weight: 600; cursor: pointer; 
+            transition: 0.2s; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); width: 100%; margin-bottom: 15px;
+        }
+        .btn-action:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-action.secondary { background: #64748b; box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2); }
+        .btn-action.secondary:hover { background: #475569; }
+
+        .tabs { 
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; 
+            background: #f1f5f9; padding: 6px; border-radius: 10px;
+        }
         .tab { 
-            padding: 12px 20px; cursor: pointer; background: #e9ecef; 
-            border: 1px solid var(--border); border-bottom: none;
-            border-radius: 5px 5px 0 0; margin-right: 5px; font-weight: bold;
-            font-size: 1.1em; color: #555;
+            flex: 1; text-align: center; padding: 12px 15px; cursor: pointer; 
+            background: transparent; border-radius: 8px; font-weight: 600;
+            font-size: 1.05em; color: var(--text-sub); transition: 0.2s;
         }
-        .tab.active { background: var(--primary); color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .tab:hover:not(.active) { color: var(--text-main); }
         
-        /* フォーム・カード系UI */
-        .patient-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #eaeaea; }
-        .patient-info label { font-weight: bold; font-size: 1em; display:block; margin-bottom: 8px; color: #444; }
-        .patient-info input { width: 90%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1em; }
+        .tab-content { display: none; animation: fadeIn 0.2s ease; }
+        .tab-content.active { display: block; }
+
+        .patient-info { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; 
+            background: #f8fafc; padding: 25px; border-radius: var(--radius); 
+            margin-bottom: 30px; border: 1px solid var(--border); 
+        }
+        .patient-info label { font-weight: 600; font-size: 0.95em; display:block; margin-bottom: 8px; color: var(--text-sub); }
+        .patient-info input { 
+            width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--border); 
+            border-radius: 8px; font-size: 1em; transition: 0.2s; background: var(--surface);
+        }
+        .patient-info input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         
         .check-item { 
-            display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 1.1em; 
-            background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eaeaea;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer;
+            display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 1.05em; 
+            background: var(--surface); padding: 18px 20px; border-radius: var(--radius); 
+            border: 1px solid var(--border); cursor: pointer; transition: 0.2s;
         }
-        .check-item input[type="checkbox"] { transform: scale(1.8); margin-right: 15px; margin-top: 2px; cursor: pointer; }
-        
-        .measure-table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .measure-table th, .measure-table td { border: 1px solid var(--border); padding: 12px; text-align: center; vertical-align: middle; }
-        .measure-table th { background: #f8f9fa; font-size: 1em; color: #333; }
-        .measure-input { width: 60px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
-        
-        .signature-box { border: 2px dashed #aaa; width: 100%; max-width: 400px; height: 120px; background: #fafafa; cursor: crosshair; touch-action: none; border-radius: 8px; }
-        .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; font-size: 1.1em; transition: 0.2s; }
-        .btn-save { background: #28a745; margin-top: 10px; }
-        .btn-clear { background: #dc3545; padding: 8px 15px; font-size: 0.9em; margin-left: 10px; }
-        .btn-export { background: #007bff; width: 100%; font-size: 1.3em; padding: 18px; margin-top: 20px; }
-        .btn-action { background: #17a2b8; color: white; width: 100%; padding: 15px; font-size: 1.2em; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
+        .check-item:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .check-item input[type="checkbox"] { 
+            transform: scale(1.6); margin-right: 20px; margin-top: 4px; cursor: pointer; 
+            accent-color: var(--primary);
+        }
+        .check-item span { flex: 1; line-height: 1.5; color: var(--text-main); font-weight: 500; }
 
-        .help-icon { 
-            display: inline-block; width: 28px; height: 28px; background: #17a2b8; color: white; 
-            border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; cursor: pointer; margin-left: 10px;
+        .measure-table-container { overflow-x: auto; margin: 20px 0 30px; border-radius: var(--radius); border: 1px solid var(--border); }
+        .measure-table { width: 100%; border-collapse: collapse; background: var(--surface); }
+        .measure-table th, .measure-table td { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 15px; text-align: center; vertical-align: middle; }
+        .measure-table th:last-child, .measure-table td:last-child { border-right: none; }
+        .measure-table tbody tr:last-child td { border-bottom: none; }
+        .measure-table th { background: #f8fafc; font-size: 0.95em; color: var(--text-sub); font-weight: 600; white-space: nowrap;}
+        
+        .measure-input { 
+            width: 65px; padding: 10px; text-align: center; border: 1px solid var(--border); 
+            border-radius: 6px; font-size: 1em; transition: 0.2s; background: #f8fafc;
         }
+        .measure-input:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
         
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
-        #modal img { max-width: 95%; max-height: 95%; border: 3px solid white; border-radius: 8px; }
+        .signature-box { 
+            border: 2px dashed #cbd5e1; width: 100%; max-width: 500px; height: 140px; 
+            background: #f8fafc; cursor: crosshair; touch-action: none; border-radius: var(--radius); 
+            transition: 0.2s;
+        }
+        .signature-box:hover { border-color: #94a3b8; }
         
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; color: white; font-weight: bold; margin-right: 5px; }
-        .bg-Boston { background: #0056b3; }
-        .bg-Biotronik { background: #e3000f; }
-        .bg-Medtronic { background: #002554; }
-        .bg-NihonKohden { background: #00a0e9; }
-        .bg-PM { background: #28a745; }
-        .bg-ICD { background: #6f42c1; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: white; font-size: 1em; transition: 0.2s; }
+        .btn-save { background: var(--success); margin-top: 15px; }
+        .btn-save:hover { background: #059669; }
+        .btn-clear { background: #f1f5f9; color: var(--danger); border: 1px solid #e2e8f0; margin-left: 10px; }
+        .btn-clear:hover { background: #fee2e2; border-color: #fca5a5; }
+        
+        .help-icon { 
+            display: inline-flex; justify-content: center; align-items: center; width: 26px; height: 26px; 
+            background: #e0f2fe; color: #0284c7; border-radius: 50%; font-weight: bold; cursor: pointer; 
+            margin-left: 10px; transition: 0.2s; font-size: 0.9em;
+        }
+        .help-icon:hover { background: #bae6fd; transform: scale(1.1); }
+        
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        #modal img { max-width: 95%; max-height: 95%; border-radius: var(--radius); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        
+        /* Badges for patient list */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8em; color: white; font-weight: 700; margin-right: 6px; letter-spacing: 0.5px; }
+        .bg-Boston { background: #2563eb; } /* Blue */
+        .bg-Biotronik { background: #dc2626; } /* Red */
+        .bg-Medtronic { background: #0f766e; } /* Teal */
+        .bg-NihonKohden { background: #ea580c; } /* Orange */
+        .bg-PM { background: #64748b; }
+        .bg-ICD { background: #475569; }
+
+        .file-upload-wrapper {
+            position: relative; overflow: hidden; display: inline-block; width: 100%;
+        }
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%;
+        }
+        .btn-upload {
+            background: #f1f5f9; border: 2px dashed #cbd5e1; color: var(--text-sub); display: block; 
+            text-align: center; padding: 20px; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .file-upload-wrapper:hover .btn-upload { background: #e2e8f0; border-color: #94a3b8; color: var(--text-main); }
     </style>
 </head>
 <body>
@@ -100,47 +196,46 @@
 <div class="container">
     <!-- HOME SCREEN -->
     <div id="screen-home" class="screen active">
-        <h1 style="font-size: 1.8em; margin-bottom: 30px;">MRI デバイス統合チェックリスト</h1>
-        <button class="btn btn-action" style="background: #0056b3;" onclick="showScreen('screen-mfg')">＋ 新規チェックリスト作成</button>
-        <button class="btn btn-action" style="background: #6c757d;" onclick="showPatientList()">🗂️ 保存データ一覧から再開</button>
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="color: var(--text-main); font-size: 2.2em; margin-bottom: 10px;">MRI デバイス統合チェックリスト</h1>
+            <p style="color: var(--text-sub); font-size: 1.1em;">メーカーを選択して新規作成するか、保存データを読み込んでください。</p>
+        </div>
+        
+        <div style="max-width: 600px; margin: 0 auto 40px;">
+            <button class="btn-action secondary" onclick="showPatientList()">🗂️ 全患者の保存データを確認・再開</button>
+        </div>
+
+        <h2 style="color: var(--text-sub); font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: -10px;">新規作成 (メーカー選択)</h2>
+        <div class="home-grid">
+            <button class="btn-card" onclick="selectManufacturer('Boston')">Boston Scientific<br><span style="font-size:0.8em; font-weight:normal; color:var(--text-sub);">ボストン</span></button>
+            <button class="btn-card" onclick="selectManufacturer('Biotronik')">Biotronik<br><span style="font-size:0.8em; font-weight:normal; color:var(--text-sub);">バイオトロニック</span></button>
+            <button class="btn-card" onclick="selectManufacturer('Medtronic')">Medtronic<br><span style="font-size:0.8em; font-weight:normal; color:var(--text-sub);">メドトロニック</span></button>
+            <button class="btn-card" onclick="selectManufacturer('NihonKohden')">Nihon Kohden<br><span style="font-size:0.8em; font-weight:normal; color:var(--text-sub);">日本光電</span></button>
+        </div>
     </div>
 
     <!-- PATIENT LIST SCREEN -->
     <div id="screen-patient-list" class="screen">
         <div class="top-bar">
-            <button class="btn-back" onclick="showScreen('screen-home')">← 戻る</button>
+            <button class="btn-back" onclick="showScreen('screen-home')">← ホームに戻る</button>
             <h2>保存データ一覧</h2>
-            <div></div>
+            <div style="width: 100px;"></div> <!-- Spacer for alignment -->
         </div>
-        <div id="patient-list-container" style="background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <div id="patient-list-container" style="background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden;">
             <!-- List will be generated here -->
-        </div>
-    </div>
-
-    <!-- MANUFACTURER SCREEN -->
-    <div id="screen-mfg" class="screen">
-        <div class="top-bar">
-            <button class="btn-back" onclick="showScreen('screen-home')">← 戻る</button>
-            <h2>メーカー選択</h2>
-            <div></div>
-        </div>
-        <div class="home-grid">
-            <button class="btn-card" onclick="selectManufacturer('Boston')">Boston Scientific<br>(ボストン)</button>
-            <button class="btn-card" onclick="selectManufacturer('Biotronik')">Biotronik<br>(バイオトロニック)</button>
-            <button class="btn-card" onclick="selectManufacturer('Medtronic')">Medtronic<br>(メドトロニック)</button>
-            <button class="btn-card" onclick="selectManufacturer('NihonKohden')">Nihon Kohden<br>(日本光電)</button>
         </div>
     </div>
 
     <!-- DEVICE SCREEN -->
     <div id="screen-device" class="screen">
         <div class="top-bar">
-            <button class="btn-back" onclick="showScreen('screen-mfg')">← 戻る</button>
+            <button class="btn-back" onclick="showScreen('screen-home')">← 戻る</button>
             <h2 id="selected-mfg-title"></h2>
-            <div></div>
+            <div style="width: 80px;"></div>
         </div>
-        <h2>デバイス種類選択</h2>
-        <div class="home-grid" id="device-btn-container">
+        <h1 style="margin-top: 40px; margin-bottom: 10px;">デバイス種類を選択</h1>
+        <p style="text-align:center; color: var(--text-sub); margin-bottom: 30px;">チェックリストを作成するデバイスのタイプを指定してください。</p>
+        <div class="home-grid" id="device-btn-container" style="max-width: 600px; margin: 0 auto;">
             <!-- JSで動的に生成 -->
         </div>
     </div>
@@ -148,22 +243,27 @@
     <!-- CHECKLIST SCREEN -->
     <div id="screen-checklist" class="screen">
         <div class="top-bar">
-            <button class="btn-back" onclick="showScreen('screen-home')">← ホームへ戻る</button>
-            <h2 id="checklist-title" style="margin: 0; font-size: 1.4em;"></h2>
-            <div></div>
+            <button class="btn-back" onclick="showScreen('screen-home')">← ホーム</button>
+            <h2 id="checklist-title" style="color: var(--text-main);"></h2>
+            <button class="btn-back" style="color: var(--danger); border-color: #fecaca; background: #fef2f2;" onclick="clearCurrentData()">🗑️ クリア</button>
         </div>
 
         <div class="patient-info">
-            <div><label>患者ID</label><input type="text" id="patient-id" placeholder="ID入力で自動保存" onchange="autoSave()"></div>
-            <div><label>患者名</label><input type="text" id="patient-name" onchange="autoSave()"></div>
+            <div><label>患者ID <span style="color:var(--danger); font-weight:normal;">*必須 (自動保存キー)</span></label><input type="text" id="patient-id" placeholder="IDを入力してください" onchange="loadPatientData()"></div>
+            <div><label>患者名</label><input type="text" id="patient-name" placeholder="氏名" onchange="autoSave()"></div>
             <div><label>MRI検査オーダー日</label><input type="date" id="exam-order-date" onchange="autoSave()"></div>
             <div><label>MRI検査実施日</label><input type="date" id="exam-exec-date" onchange="autoSave()"></div>
-            <div style="grid-column: span 2;">
+            
+            <div style="grid-column: 1 / -1;">
                 <label>📷 MRI対応カード画像 (任意)</label>
-                <!-- Windows対策を含め、汎用的なファイル選択として機能 -->
-                <input type="file" id="card-image-input" accept="image/*" capture="environment" onchange="handleImageUpload(event)" style="background: #f8f9fa; cursor: pointer;">
-                <img id="card-image-preview" style="display:none; max-height: 120px; margin-top: 10px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" />
-                <button class="btn-clear" id="btn-clear-img" style="display:none; margin-top:10px;" onclick="clearImage()">× 画像を削除</button>
+                <div class="file-upload-wrapper">
+                    <span class="btn-upload">📁 タップして画像を選択、または撮影</span>
+                    <input type="file" id="card-image-input" accept="image/*" capture="environment" onchange="handleImageUpload(event)">
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                    <img id="card-image-preview" style="display:none; max-height: 120px; margin-top: 15px; border-radius: 8px; border: 1px solid var(--border);" />
+                    <button class="btn btn-clear" id="btn-clear-img" style="display:none; margin-top:15px;" onclick="clearImage()">画像を削除</button>
+                </div>
             </div>
         </div>
 
@@ -179,47 +279,45 @@
         <div id="tab2" class="tab-content">
             <div id="check-list-2"></div>
             <div id="measurements-pre"></div>
-            <div style="margin-top:30px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eaeaea;">
-                <label style="font-weight: bold;">施行CE 署名 (印):</label><br>
+            <div style="margin-top:30px; background: #f8fafc; padding: 25px; border-radius: var(--radius); border: 1px solid var(--border);">
+                <label style="font-weight: 600; color: var(--text-main); margin-bottom:10px; display:block;">✍️ 施行CE 署名 (印):</label>
                 <canvas id="sig-ce" class="signature-box"></canvas><br>
-                <button class="btn btn-save" onclick="saveSignature('sig-ce')">✓ 署名を保存</button>
-                <button class="btn btn-clear" onclick="clearSignature('sig-ce')">× 消去</button>
+                <button class="btn btn-save" onclick="saveSignature('sig-ce')">✓ 署名を確定</button>
+                <button class="btn btn-clear" onclick="clearSignature('sig-ce')">書き直す</button>
             </div>
         </div>
         
         <div id="tab3" class="tab-content">
             <div id="check-list-3"></div>
-            <div style="margin-top:30px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eaeaea;">
-                <label style="font-weight: bold;">放射線課 署名 (印):</label><br>
+            <div style="margin-top:30px; background: #f8fafc; padding: 25px; border-radius: var(--radius); border: 1px solid var(--border);">
+                <label style="font-weight: 600; color: var(--text-main); margin-bottom:10px; display:block;">✍️ 放射線技師 署名 (印):</label>
                 <canvas id="sig-rad" class="signature-box"></canvas><br>
-                <button class="btn btn-save" onclick="saveSignature('sig-rad')">✓ 署名を保存</button>
-                <button class="btn btn-clear" onclick="clearSignature('sig-rad')">× 消去</button>
+                <button class="btn btn-save" onclick="saveSignature('sig-rad')">✓ 署名を確定</button>
+                <button class="btn btn-clear" onclick="clearSignature('sig-rad')">書き直す</button>
             </div>
         </div>
         
         <div id="tab4" class="tab-content">
             <div id="check-list-4"></div>
             <div id="measurements-post"></div>
-            <div style="margin-top:30px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eaeaea;">
-                <label style="font-weight: bold;">医師 (循環器内科等) 署名 (印):</label><br>
+            <div style="margin-top:30px; background: #f8fafc; padding: 25px; border-radius: var(--radius); border: 1px solid var(--border);">
+                <label style="font-weight: 600; color: var(--text-main); margin-bottom:10px; display:block;">✍️ 医師 (循環器内科等) 署名 (印):</label>
                 <canvas id="sig-doc" class="signature-box"></canvas><br>
-                <button class="btn btn-save" onclick="saveSignature('sig-doc')">✓ 署名を保存</button>
-                <button class="btn btn-clear" onclick="clearSignature('sig-doc')">× 消去</button>
+                <button class="btn btn-save" onclick="saveSignature('sig-doc')">✓ 署名を確定</button>
+                <button class="btn btn-clear" onclick="clearSignature('sig-doc')">書き直す</button>
             </div>
         </div>
 
-        <div style="margin-top: 30px; border-top: 2px solid var(--border); padding-top: 20px;">
-            <div class="tabs" style="border-bottom: none;">
-                <div class="tab active" style="flex:1; text-align:center; border-radius: 5px;" onclick="autoSave(); alert('データを端末に保存しました。\nホームの「全患者データ一覧」からいつでも再開できます。');">💾 一時保存する</div>
-                <div class="tab" style="flex:1; text-align:center; background: #007bff; color:white; border-radius: 5px;" onclick="exportToExcel()">📊 Excel出力</div>
-            </div>
+        <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <button class="btn-action secondary" style="margin: 0; font-size: 1.2em;" onclick="manualSave()">💾 端末に一時保存</button>
+            <button class="btn-action" style="margin: 0; font-size: 1.2em;" onclick="exportToExcel()">📊 Excel出力</button>
         </div>
     </div>
 </div>
 
 <!-- モーダル用 -->
 <div id="modal" onclick="this.style.display='none'">
-    <img src="mrichange.jpg" alt="画像が見つかりません。GitHubに mrichange.jpg をアップロードしてください。" />
+    <img src="mrichange.jpg" alt="画像が見つかりません (GitHubに mrichange.jpg を配置してください)" />
 </div>
 
 <script>
@@ -230,7 +328,7 @@
                 title: 'ボストン PM チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様より条件付きMRI対応カードの提示がある",
                         "患者様より条件付きMRIペースメーカの手帳の提示がある",
                         "ペースメーカ植込み後6週間を超えている",
@@ -247,7 +345,7 @@
                         "Bipolar Pacingである",
                         "リードインピーダンスは200 Ω～2000 Ω",
                         "ペーシング出力 5.0 V / 1.0 ms で横隔膜ツイッチングが無い",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -256,10 +354,7 @@
                         "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならない",
                         "患者動態モニタリングを行えている"
                     ],
-                    tab4: [
-                        "設定戻しの確認",
-                        "前データとの変動が無い事を確認"
-                    ]
+                    tab4: ["設定戻しの確認", "前データとの変動が無い事を確認"]
                 },
                 measureColumns: ["右心房 (RA)", "右心室 (RV)"],
                 measureRows: [
@@ -272,7 +367,7 @@
                 title: 'ボストン ICD/CRT-D チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様より条件付きMRI対応カードの提示がある",
                         "患者様より条件付きMRI ICD/CRT-Dの手帳の提示がある",
                         "ICD/CRT-D植込み後6週間を超えている",
@@ -290,7 +385,7 @@
                         "リードインピーダンスは200 Ω～2000 Ω",
                         "ペーシング出力 5.0 V / 1.0 ms で横隔膜ツイッチングが無い",
                         "★ 除細動機能がオフであることを確認",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -299,10 +394,7 @@
                         "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならない",
                         "患者動態モニタリングを行えている"
                     ],
-                    tab4: [
-                        "★ 設定戻しの確認（除細動機能がオンであることを確認）",
-                        "前データとの変動が無い事を確認"
-                    ]
+                    tab4: ["★ 設定戻しの確認（除細動機能がオンであることを確認）", "前データとの変動が無い事を確認"]
                 },
                 measureColumns: ["右心房 (RA)", "右心室 (RV)", "左心室 (LV)", "RV/SVCコイル"],
                 measureRows: [
@@ -317,7 +409,7 @@
                 title: 'バイオトロニック PM チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様よりバイトロニック社条件付きMRI対応カードの提示がある",
                         "患者様よりバイオトロニック社条件付きMRIペースメーカの手帳の提示がある",
                         "ペースメーカ植込み後6週間を超えている",
@@ -326,14 +418,14 @@
                         "ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器が無い",
                         "患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうように伝える",
                         "MRI検査当日、ペースメーカーチェックにおいて条件を満たしていないと検査できないことがあると伝える",
-                        "条件クリアしていれば第2MRI（1301）へ連絡しオーダー日時を伝える",
+                        "条件クリアしていれば第2MRI（1301）へ連絡しオーダー日時をレントゲン技師に伝える",
                         "カルテ等のインプラント情報でペースメーカー装着日が記入されているか確認"
                     ],
                     tab2: [
                         "ペースメーカチェック",
                         "Bipolar Pacingである",
                         "リードインピーダンスは200 Ω～1500 Ω",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -342,10 +434,7 @@
                         "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならない",
                         "患者動態モニタリングを行えている"
                     ],
-                    tab4: [
-                        "設定戻しの確認",
-                        "前データとの変動が無い事を確認"
-                    ]
+                    tab4: ["設定戻しの確認", "前データとの変動が無い事を確認"]
                 },
                 measureColumns: ["心房", "心室"],
                 measureRows: [
@@ -358,7 +447,7 @@
                 title: 'バイオトロニック ICD/CRT-D チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様よりバイオトロニック社条件付きMRI対応カードの提示がある",
                         "患者様よりバイオトロニック社条件付きMRIペースメーカの手帳の提示がある",
                         "ペースメーカ植込み後6週間を超えている",
@@ -367,7 +456,7 @@
                         "ペースメーカ本体と併用されているMRI対応リード以外の植え込み機器が無い",
                         "患者様にMRI検査日にPM手帳とカードを必ず持ってきてもらうように伝える",
                         "MRI検査当日、ペースメーカーチェックにおいて条件を満たしていないと検査できないことがあると伝える",
-                        "条件クリアしていれば第2MRI（1301）へ連絡しオーダー日時を伝える",
+                        "条件クリアしていれば第2MRI（1301）へ連絡しオーダー日時をレントゲン技師に伝える",
                         "カルテ等のインプラント情報でペースメーカー装着日が記入されているか確認"
                     ],
                     tab2: [
@@ -375,7 +464,7 @@
                         "Bipolar Pacingである",
                         "リード抵抗は200 Ω～1500 Ω",
                         "★ 除細動機能がオフであることを確認",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -384,10 +473,7 @@
                         "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならない",
                         "患者動態モニタリングを行えている"
                     ],
-                    tab4: [
-                        "★ 設定戻しの確認（除細動機能がオンであることを確認）",
-                        "前データとの変動が無い事を確認"
-                    ]
+                    tab4: ["★ 設定戻しの確認（除細動機能がオンであることを確認）", "前データとの変動が無い事を確認"]
                 },
                 measureColumns: ["心房", "右心室", "左心室", "RV/SVC コイル"],
                 measureRows: [
@@ -402,7 +488,7 @@
                 title: 'メドトロニック PM チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様よりメドトロニック社条件付きMRI対応カードの提示がある",
                         "患者様よりメドトロニック社条件付きMRIペースメーカの手帳の提示がある",
                         "ペースメーカ植込み後6週間を超えている",
@@ -419,7 +505,7 @@
                         "リード抵抗は200 Ω～3000 Ω",
                         "ペーシング出力 5.0 V / 1.0 ms で横隔膜ツイッチングが無い",
                         "★ MRI撮像前確認時に『SureScan設定』をONにする",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -444,7 +530,7 @@
                 title: 'メドトロニック ICD/CRT-D チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様よりメドトロニック社条件付きMRI対応カードの提示がある",
                         "患者様よりメドトロニック社条件付きMRIペースメーカの手帳の提示がある",
                         "ペースメーカ植込み後6週間を超えている",
@@ -462,7 +548,7 @@
                         "リード抵抗は200 Ω～3000 Ω（コイル抵抗は20Ω～200Ω）",
                         "ペーシング出力 5.0 V / 1.0 ms で横隔膜ツイッチングが無い",
                         "★ 除細動機能がオフであることを確認",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -471,10 +557,7 @@
                         "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならない",
                         "患者動態モニタリングを行えている"
                     ],
-                    tab4: [
-                        "★ 設定戻しの確認（除細動機能がオンであることを確認）",
-                        "前データとの変動が無い事を確認"
-                    ]
+                    tab4: ["★ 設定戻しの確認（除細動機能がオンであることを確認）", "前データとの変動が無い事を確認"]
                 },
                 measureColumns: ["心房", "右心室", "左心室", "RV/SVC コイル"],
                 measureRows: [
@@ -489,7 +572,7 @@
                 title: '日本光電 PM チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様より日本光電社条件付きMRI対応カードの提示がある",
                         "患者様より日本光電社条件付きMRIペースメーカの手帳の提示がある",
                         "ペースメーカ植込み後6週間を超えている",
@@ -506,7 +589,7 @@
                         "Bipolar Pacingである",
                         "リード抵抗は200 Ω～3000 Ω",
                         "ペーシング出力 5.0 V / 1.0 ms で横隔膜ツイッチングが無い",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -515,10 +598,7 @@
                         "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならない",
                         "患者動態モニタリングを行えている"
                     ],
-                    tab4: [
-                        "設定戻しの確認",
-                        "前データとの変動が無い事を確認"
-                    ]
+                    tab4: ["設定戻しの確認", "前データとの変動が無い事を確認"]
                 },
                 measureColumns: ["心房", "右心室"],
                 measureRows: [
@@ -531,7 +611,7 @@
                 title: '日本光電 ICD/CRT-D チェックリスト',
                 tabs: {
                     tab1: [
-                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#0056b3; font-weight:bold; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
+                        "<a href='https://cieds-mri.com/jadia/public/mri-combi_search/index' target='_blank' style='color:#2563eb; text-decoration:underline;' onclick='setTimeout(()=> {document.getElementById(\"check-jadia\").checked = true; autoSave();}, 1000);'>🔍 MRI組み合わせ検索サイトで対応機器か確認する ↗</a>",
                         "患者様より日本光電社条件付きMRI対応カードの提示がある",
                         "患者様より日本光電社条件付きMRIペースメーカの手帳の提示がある",
                         "ペースメーカ植込み後6週間を超えている",
@@ -549,7 +629,7 @@
                         "リード抵抗は200 Ω～3000 Ω（コイル抵抗は20Ω～200Ω）",
                         "ペーシング出力 5.0 V / 1.0 ms で横隔膜ツイッチングが無い",
                         "★ 除細動機能がオフであることを確認",
-                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'\">?</span>"
+                        "MRI撮像中モード指示 <span class='help-icon' onclick=\"document.getElementById('modal').style.display='flex'; event.stopPropagation();\">?</span>"
                     ],
                     tab3: [
                         "撮像は側臥位ではない",
@@ -558,10 +638,7 @@
                         "送信を行うローカルコイルは、AP方向においてペーシングシステムと重ならない",
                         "患者動態モニタリングを行えている"
                     ],
-                    tab4: [
-                        "★ 設定戻しの確認（除細動機能がオンであることを確認）",
-                        "前データとの変動が無い事を確認"
-                    ]
+                    tab4: ["★ 設定戻しの確認（除細動機能がオンであることを確認）", "前データとの変動が無い事を確認"]
                 },
                 measureColumns: ["心房", "右心室", "左心室", "RV/SVC コイル"],
                 measureRows: [
@@ -618,7 +695,7 @@
         let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
         if(jadiaCb) jadiaCb.id = 'check-jadia';
         
-        // --- 新規作成時はフォームの入力をクリアする ---
+        // --- 新規作成時はフォームの入力を完全にクリアする ---
         resetForm();
 
         showScreen('screen-checklist');
@@ -628,106 +705,20 @@
         if(firstTabBtn) switchTab(firstTabBtn, 'tab1');
     }
 
-    /* --- 新規作成時のリセット処理 --- */
     function resetForm() {
         document.getElementById('patient-id').value = '';
         document.getElementById('patient-name').value = '';
         document.getElementById('exam-order-date').value = '';
         document.getElementById('exam-exec-date').value = '';
         
-        // チェックボックスと入力欄のクリア
         document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         document.querySelectorAll('.measure-input').forEach(inp => inp.value = '');
         document.querySelectorAll('[id^="disp-pre-"]').forEach(span => span.innerText = '-');
         
-        // 画像と署名のクリア
         clearImage();
         ['sig-ce', 'sig-rad', 'sig-doc'].forEach(sid => clearSignature(sid));
     }
 
-    /* --- 一覧画面表示処理 --- */
-    function showPatientList() {
-        const container = document.getElementById('patient-list-container');
-        container.innerHTML = '';
-        let count = 0;
-
-        // localStorage内のデータを検索
-        for (let i = 0; i < localStorage.length; i++) {
-            let key = localStorage.key(i);
-            // 署名データは除外して、本体データのみを対象とする
-            if (key.startsWith('mriData_') && !key.includes('_sig-')) {
-                try {
-                    let data = JSON.parse(localStorage.getItem(key));
-                    let parts = key.split('_'); 
-                    // 例: mriData_Boston_PM_1234
-                    let mfg = parts[1];
-                    let dev = parts[2] === 'ICD' ? 'ICD_CRT' : parts[2]; // 簡易パース
-                    let id = parts[parts.length - 1]; // 最後の部分がID
-                    
-                    let trColor = count % 2 === 0 ? '#f9f9f9' : '#fff';
-                    
-                    let html = `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:${trColor}; padding:15px; border-bottom:1px solid #eee;">
-                            <div>
-                                <div style="margin-bottom:5px;">
-                                    <span class="badge bg-${mfg}">${mfg}</span>
-                                    <span class="badge bg-${dev.replace('_CRT', '')}">${dev}</span>
-                                </div>
-                                <div style="font-size:1.1em; font-weight:bold;">ID: ${id} <span style="font-weight:normal; margin-left:10px;">氏名: ${data.name || '未入力'}</span></div>
-                                <div style="font-size:0.9em; color:#666;">オーダー日: ${data.orderDate || '-'} | 実施日: ${data.execDate || '-'}</div>
-                            </div>
-                            <div>
-                                <button class="btn" style="background:#28a745; margin-right:5px; font-size:0.9em;" onclick="loadFromList('${mfg}', '${dev}', '${id}')">開く</button>
-                                <button class="btn" style="background:#dc3545; font-size:0.9em;" onclick="deleteFromList('${key}')">削除</button>
-                            </div>
-                        </div>
-                    `;
-                    container.innerHTML += html;
-                    count++;
-                } catch(e) { console.error("データ読み込みエラー", e); }
-            }
-        }
-        
-        if (count === 0) {
-            container.innerHTML = '<p style="text-align:center; padding: 20px;">保存されているデータはありません。</p>';
-        }
-        
-        showScreen('screen-patient-list');
-    }
-
-    function loadFromList(mfg, device, id) {
-        currentMfg = mfg;
-        currentDevice = device;
-        
-        const conf = configData[currentMfg][currentDevice];
-        document.getElementById('checklist-title').innerText = conf.title;
-        renderChecklists(conf);
-        renderMeasurementTables(conf);
-        setupSignatures();
-        
-        // JADIAリンク用
-        let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
-        if(jadiaCb) jadiaCb.id = 'check-jadia';
-        
-        document.getElementById('patient-id').value = id;
-        showScreen('screen-checklist');
-        loadPatientData();
-        
-        const firstTab = document.querySelector('.main-tab');
-        if(firstTab) switchTab(firstTab, 'tab1');
-    }
-
-    function deleteFromList(key) {
-        if(confirm('この患者データを完全に削除しますか？')) {
-            localStorage.removeItem(key);
-            localStorage.removeItem(`${key}_sig-ce`);
-            localStorage.removeItem(`${key}_sig-rad`);
-            localStorage.removeItem(`${key}_sig-doc`);
-            showPatientList(); // 一覧を再描画
-        }
-    }
-
-    /* --- UI描画 --- */
     function switchTab(element, tabId) {
         document.querySelectorAll('.tab.main-tab').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -754,13 +745,14 @@
     function renderMeasurementTables(conf) {
         let thead = `<tr><th>計測項目</th>${conf.measureColumns.map(c => `<th>${c}</th>`).join('')}</tr>`;
         
+        // 検査前
         let preBody = conf.measureRows.map(row => {
             let cells = conf.measureColumns.map((col, idx) => {
                 if (row.type === "dual_threshold") {
                     return `<td>
-                        <div style="display:flex; align-items:center; justify-content:center; gap:2px; flex-wrap:nowrap;">
-                            <input type="text" class="measure-input" style="width:40px;" id="pre-${row.id}_v-${idx}" onchange="autoSave()"> V /
-                            <input type="text" class="measure-input" style="width:40px;" id="pre-${row.id}_ms-${idx}" onchange="autoSave()"> ms
+                        <div style="display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:nowrap;">
+                            <input type="text" class="measure-input" style="width:50px;" id="pre-${row.id}_v-${idx}" placeholder="V" onchange="autoSave()"> /
+                            <input type="text" class="measure-input" style="width:50px;" id="pre-${row.id}_ms-${idx}" placeholder="ms" onchange="autoSave()">
                         </div>
                     </td>`;
                 } else {
@@ -769,30 +761,31 @@
             }).join('');
             return `<tr><td>${row.label}</td>${cells}</tr>`;
         }).join('');
-        document.getElementById('measurements-pre').innerHTML = `<table class="measure-table">${thead}<tbody>${preBody}</tbody></table>`;
+        document.getElementById('measurements-pre').innerHTML = `<div class="measure-table-container"><table class="measure-table">${thead}<tbody>${preBody}</tbody></table></div>`;
 
+        // 検査後
         let postBody = conf.measureRows.map(row => {
             let cells = conf.measureColumns.map((col, idx) => {
                 if (row.type === "dual_threshold") {
                     return `<td>
-                        <div style="font-size:0.8em; color:#777; margin-bottom:2px;">
-                            前: <span id="disp-pre-${row.id}_v-${idx}">-</span> V / <span id="disp-pre-${row.id}_ms-${idx}">-</span> ms
+                        <div style="font-size:0.8em; color:var(--text-sub); margin-bottom:4px;">
+                            前: <span id="disp-pre-${row.id}_v-${idx}" style="font-weight:600;">-</span> V / <span id="disp-pre-${row.id}_ms-${idx}" style="font-weight:600;">-</span> ms
                         </div>
-                        <div style="display:flex; align-items:center; justify-content:center; gap:2px; flex-wrap:nowrap;">
-                            <input type="text" class="measure-input" style="width:40px;" id="post-${row.id}_v-${idx}" onchange="autoSave()"> V /
-                            <input type="text" class="measure-input" style="width:40px;" id="post-${row.id}_ms-${idx}" onchange="autoSave()"> ms
+                        <div style="display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:nowrap;">
+                            <input type="text" class="measure-input" style="width:50px;" id="post-${row.id}_v-${idx}" placeholder="V" onchange="autoSave()"> /
+                            <input type="text" class="measure-input" style="width:50px;" id="post-${row.id}_ms-${idx}" placeholder="ms" onchange="autoSave()">
                         </div>
                     </td>`;
                 } else {
                     return `<td>
-                        <div style="font-size:0.8em; color:#777; margin-bottom:2px;">前: <span id="disp-pre-${row.id}-${idx}">-</span></div>
+                        <div style="font-size:0.8em; color:var(--text-sub); margin-bottom:4px;">前: <span id="disp-pre-${row.id}-${idx}" style="font-weight:600;">-</span></div>
                         <input type="text" class="measure-input" id="post-${row.id}-${idx}" onchange="autoSave()">
                     </td>`;
                 }
             }).join('');
             return `<tr><td>${row.label}</td>${cells}</tr>`;
         }).join('');
-        document.getElementById('measurements-post').innerHTML = `<table class="measure-table">${thead}<tbody>${postBody}</tbody></table>`;
+        document.getElementById('measurements-post').innerHTML = `<div class="measure-table-container"><table class="measure-table">${thead}<tbody>${postBody}</tbody></table></div>`;
     }
 
     /* --- データ保存・復元 --- */
@@ -802,8 +795,9 @@
     }
 
     function autoSave() {
-        if (!document.getElementById('patient-id').value.trim()) return;
+        if (!document.getElementById('patient-id').value.trim()) return; // IDがない場合は自動保存しない
         
+        // 検査後の表に検査前の値を同期反映
         const conf = configData[currentMfg][currentDevice];
         conf.measureRows.forEach(row => {
             conf.measureColumns.forEach((col, idx) => {
@@ -833,6 +827,16 @@
 
         localStorage.setItem(getSaveKey(), JSON.stringify(data));
     }
+    
+    function manualSave() {
+        if (!document.getElementById('patient-id').value.trim()) {
+            alert("一時保存するには、まず「患者ID」を入力してください。");
+            document.getElementById('patient-id').focus();
+            return;
+        }
+        autoSave();
+        alert('データを端末に保存しました。\nホームの「全患者データ一覧」からいつでも再開できます。');
+    }
 
     function loadPatientData() {
         const id = document.getElementById('patient-id').value.trim();
@@ -840,6 +844,7 @@
         let saved = localStorage.getItem(getSaveKey());
         
         if (saved) {
+            // 保存データがあれば復元
             let data = JSON.parse(saved);
             document.getElementById('patient-name').value = data.name || '';
             document.getElementById('exam-order-date').value = data.orderDate || '';
@@ -870,7 +875,7 @@
                     let btn = document.querySelector(`button[onclick="saveSignature('${sid}')"]`);
                     if(btn) {
                         btn.innerHTML = "✓ 保存済";
-                        btn.style.background = "#17a2b8";
+                        btn.style.background = "var(--primary)";
                     }
                 }
             });
@@ -881,7 +886,98 @@
         }
     }
 
-    /* --- 写真・署名機能 --- */
+    function clearCurrentData() {
+        if(confirm('現在の入力データをすべてクリアしますか？\n（この患者の保存データも削除されます）')) {
+            localStorage.removeItem(getSaveKey());
+            localStorage.removeItem(`${getSaveKey()}_sig-ce`);
+            localStorage.removeItem(`${getSaveKey()}_sig-rad`);
+            localStorage.removeItem(`${getSaveKey()}_sig-doc`);
+            resetForm();
+            // ホームに戻る
+            showScreen('screen-home');
+        }
+    }
+
+    /* --- 全患者リスト画面表示処理 --- */
+    function showPatientList() {
+        const container = document.getElementById('patient-list-container');
+        container.innerHTML = '';
+        let count = 0;
+
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key.startsWith('mriData_') && !key.includes('_sig-')) {
+                try {
+                    let data = JSON.parse(localStorage.getItem(key));
+                    let parts = key.split('_'); 
+                    let mfg = parts[1];
+                    let dev = parts[2] === 'ICD' ? 'ICD_CRT' : parts[2]; // 簡易パース
+                    let id = parts[parts.length - 1]; 
+                    
+                    let trColor = count % 2 === 0 ? '#f8fafc' : '#ffffff';
+                    let shortDev = dev.replace('_CRT', ''); // 表示用
+                    
+                    let html = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:${trColor}; padding:18px 20px; border-bottom:1px solid var(--border); transition:0.2s;">
+                            <div>
+                                <div style="margin-bottom:8px;">
+                                    <span class="badge bg-${mfg}">${mfg}</span>
+                                    <span class="badge bg-${shortDev}">${dev}</span>
+                                </div>
+                                <div style="font-size:1.15em; font-weight:700; color:var(--text-main);">ID: ${id} <span style="font-weight:normal; margin-left:15px; color:var(--text-sub);">氏名: ${data.name || '未入力'}</span></div>
+                                <div style="font-size:0.9em; color:#94a3b8; margin-top:4px;">オーダ日: ${data.orderDate || '-'} | 実施日: ${data.execDate || '-'}</div>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn btn-save" style="margin:0; padding:10px 15px;" onclick="loadFromList('${mfg}', '${dev}', '${id}')">読込・再開</button>
+                                <button class="btn" style="background:white; color:var(--danger); border:1px solid #fecaca; margin:0; padding:10px 15px;" onclick="deleteFromList('${key}')">削除</button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                    count++;
+                } catch(e) { console.error("データ読み込みエラー", e); }
+            }
+        }
+        
+        if (count === 0) {
+            container.innerHTML = '<div style="text-align:center; padding: 40px; color:var(--text-sub); font-size:1.1em;">保存されているデータはありません。</div>';
+        }
+        
+        showScreen('screen-patient-list');
+    }
+
+    function loadFromList(mfg, device, id) {
+        currentMfg = mfg;
+        currentDevice = device;
+        
+        const conf = configData[currentMfg][currentDevice];
+        document.getElementById('checklist-title').innerText = conf.title;
+        renderChecklists(conf);
+        renderMeasurementTables(conf);
+        setupSignatures();
+        
+        let jadiaCb = document.querySelector('#check-list-1 input[type="checkbox"]');
+        if(jadiaCb) jadiaCb.id = 'check-jadia';
+        
+        document.getElementById('patient-id').value = id;
+        showScreen('screen-checklist');
+        loadPatientData();
+        
+        const firstTab = document.querySelector('.main-tab');
+        if(firstTab) switchTab(firstTab, 'tab1');
+    }
+
+    function deleteFromList(key) {
+        if(confirm('この患者データを完全に削除しますか？\n（復旧できません）')) {
+            localStorage.removeItem(key);
+            localStorage.removeItem(`${key}_sig-ce`);
+            localStorage.removeItem(`${key}_sig-rad`);
+            localStorage.removeItem(`${key}_sig-doc`);
+            showPatientList(); 
+        }
+    }
+
+    /* --- 写真・署名 --- */
     function handleImageUpload(e) {
         const file = e.target.files[0];
         if(!file) return;
@@ -921,11 +1017,11 @@
         ['sig-ce', 'sig-rad', 'sig-doc'].forEach(sid => {
             let cvs = document.getElementById(sid);
             // CSSの表示サイズに合わせる
-            cvs.width = cvs.offsetWidth || 400; 
-            cvs.height = 120;
+            cvs.width = cvs.offsetWidth || 500; 
+            cvs.height = 140;
             let ctx = cvs.getContext('2d');
-            ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-            ctx.lineCap = 'round';
+            ctx.lineWidth = 3; ctx.strokeStyle = '#0f172a';
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             
             const getPos = (e) => {
                 let rect = cvs.getBoundingClientRect();
@@ -934,7 +1030,6 @@
                 return { x: clientX - rect.left, y: clientY - rect.top };
             };
 
-            // スクロール防止用の設定
             const touchOptions = { passive: false };
 
             cvs.onmousedown = (e) => {
@@ -975,9 +1070,9 @@
         localStorage.setItem(`${getSaveKey()}_${sid}`, sigData);
         
         let btn = document.querySelector(`button[onclick="saveSignature('${sid}')"]`);
-        btn.innerHTML = "✓ 保存済"; btn.style.background = "#17a2b8";
+        btn.innerHTML = "✓ 保存済"; btn.style.background = "var(--primary)";
     }
-
+    
     function clearSignature(sid) {
         let cvs = document.getElementById(sid);
         let ctx = cvs.getContext('2d');
@@ -986,37 +1081,46 @@
         
         let btn = document.querySelector(`button[onclick="saveSignature('${sid}')"]`);
         if(btn) {
-            btn.innerHTML = "✓ 署名を保存";
-            btn.style.background = "#28a745";
+            btn.innerHTML = "✓ 署名を確定";
+            btn.style.background = "var(--success)";
         }
     }
 
     /* --- Excel 出力 --- */
     async function exportToExcel() {
+        if (!document.getElementById('patient-id').value.trim()) {
+            alert("患者IDが入力されていません。"); return;
+        }
+
         const wb = new ExcelJS.Workbook();
         const ws = wb.addWorksheet('Checklist');
         const conf = configData[currentMfg][currentDevice];
 
-        ws.columns = [ { width: 45 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 } ];
+        // カラム幅の設定
+        ws.columns = [ { width: 50 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 } ];
         let rowNum = 1;
 
+        // 行追加ヘルパー
         const addRow = (values, isHeader=false) => {
             let row = ws.addRow(values);
             if(isHeader) {
-                row.eachCell(cell => { cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFD9E1F2'}}; cell.font = {bold:true}; });
+                row.eachCell(cell => { cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFE2E8F0'}}; cell.font = {bold:true, color:{argb:'FF1E293B'}}; });
             }
             rowNum++; return row;
         };
 
+        // タイトル
         addRow([conf.title, "", "", "", ""], true);
         ws.mergeCells(`A${rowNum-1}:E${rowNum-1}`);
 
+        // 基本情報
         addRow(["患者ID", document.getElementById('patient-id').value]);
         addRow(["患者名", document.getElementById('patient-name').value]);
         addRow(["MRI検査オーダー日", document.getElementById('exam-order-date').value]);
         addRow(["MRI検査実施日", document.getElementById('exam-exec-date').value]);
         addRow([]);
 
+        // カード画像
         if (cardImageBase64) {
             try {
                 let imgId = wb.addImage({ base64: cardImageBase64.split(',')[1], extension: 'jpeg' });
@@ -1028,21 +1132,22 @@
             } catch(e) { console.error("Image Export Error:", e); }
         }
 
+        // タブごとのチェック項目と計測データ
         for (let t = 1; t <= 4; t++) {
             let tabNames = ["① オーダ前", "② 検査前", "③ 検査時", "④ 検査後"];
             addRow([tabNames[t-1]], true);
             
-            // チェック項目の出力
+            // チェック項目
             conf.tabs['tab'+t].forEach((txt, idx) => {
                 let cb = document.getElementById(`check-t${t}-${idx}`);
-                if(t===1 && idx===0) cb = document.getElementById('check-jadia'); // JADIAリンク特例
+                if(t===1 && idx===0) cb = document.getElementById('check-jadia');
                 let mark = (cb && cb.checked) ? "☑" : "☐";
-                let cleanTxt = txt.replace(/<[^>]*>?/gm, '');
+                let cleanTxt = txt.replace(/<[^>]*>?/gm, ''); // HTMLタグ除去
                 addRow([cleanTxt, mark]);
             });
             addRow([]);
             
-            // 計測テーブルの出力（②検査前 と ④検査後）
+            // 計測テーブル（検査前と検査後）
             if (t === 2 || t === 4) {
                 let prefix = (t === 2) ? 'pre-' : 'post-';
                 addRow(["計測項目", ...conf.measureColumns], true);
@@ -1065,6 +1170,7 @@
             }
         }
 
+        // 署名画像の添付
         const attachSig = (sid, title) => {
             let sigData = localStorage.getItem(`${getSaveKey()}_${sid}`);
             if(sigData) {
@@ -1086,13 +1192,13 @@
 
         try {
             const buffer = await wb.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `${conf.title}_${document.getElementById('patient-name').value || '未設定'}.xlsx`);
+            let fileName = `${conf.title}_${document.getElementById('patient-name').value || '未設定'}.xlsx`;
+            saveAs(new Blob([buffer]), fileName);
         } catch(e) {
             alert("Excel出力中にエラーが発生しました。");
             console.error(e);
         }
     }
-
 </script>
 </body>
 </html>
